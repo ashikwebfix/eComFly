@@ -3,6 +3,22 @@
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Plans (Must be created before users to satisfy foreign key constraints)
+CREATE TABLE IF NOT EXISTS plans (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(100) NOT NULL,
+  price INTEGER NOT NULL DEFAULT 0,
+  event_limit INTEGER DEFAULT 10000,
+  container_limit INTEGER DEFAULT 1,
+  domain_limit INTEGER DEFAULT 0,
+  support_level VARCHAR(50) DEFAULT 'Community',
+  is_active BOOLEAN DEFAULT TRUE,
+  is_featured BOOLEAN DEFAULT FALSE,
+  features JSONB DEFAULT '[]',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Users
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -17,22 +33,6 @@ CREATE TABLE IF NOT EXISTS users (
   event_limit INTEGER DEFAULT 10000,
   current_events INTEGER DEFAULT 0,
   next_billing_date DATE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Plans
-CREATE TABLE IF NOT EXISTS plans (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR(100) NOT NULL,
-  price INTEGER NOT NULL DEFAULT 0,
-  event_limit INTEGER DEFAULT 10000,
-  container_limit INTEGER DEFAULT 1,
-  domain_limit INTEGER DEFAULT 0,
-  support_level VARCHAR(50) DEFAULT 'Community',
-  is_active BOOLEAN DEFAULT TRUE,
-  is_featured BOOLEAN DEFAULT FALSE,
-  features JSONB DEFAULT '[]',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
