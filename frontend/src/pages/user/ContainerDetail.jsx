@@ -11,18 +11,31 @@ const CHART_DATA = Array.from({length: 24}, (_, i) => ({
 
 export default function ContainerDetail() {
   const { id } = useParams();
-  const [container] = useState({
-    id, name: 'Main Store Tracking', status: 'running',
-    auto_domain: 'main-abc123.ecomfly.ecomfixr.com', custom_domain: 'track.mystore.com',
-    events_count: 3420, events_today: 142, created_at: '2024-10-01T08:00:00Z',
-    gtm_container_id: 'GTM-XXXXXXX', notes: 'Primary tracking container',
-    server_region: 'Singapore', container_version: '2.24.0',
-  });
+  const [container, setContainer] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchContainer();
+  }, [id]);
+
+  const fetchContainer = async () => {
+    try {
+      const res = await api.get(`/containers/${id}`);
+      setContainer(res.data.container);
+    } catch {
+      toast.error('Failed to load container details');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const copy = (text, label) => {
     navigator.clipboard.writeText(text);
     toast.success(`${label} copied!`);
   };
+
+  if (loading) return <div className="flex items-center justify-center p-xl"><div className="spinner spinner-lg"></div></div>;
+  if (!container) return <div className="p-xl text-center">Container not found</div>;
 
   return (
     <div style={{maxWidth:1100}}>

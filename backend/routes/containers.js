@@ -9,6 +9,15 @@ const generateDomain = (name) => {
   return `${slug}-${rand}.ecomfly.ecomfixr.com`;
 };
 
+const util = require('util');
+const execPromise = util.promisify(require('child_process').exec);
+
+const getAvailablePort = async () => {
+  const result = await db.query('SELECT MAX(container_port) as max_port FROM containers');
+  const maxPort = result.rows[0].max_port;
+  return maxPort && maxPort >= 8000 ? maxPort + 1 : 8000;
+};
+
 // GET /api/containers - List user's containers
 router.get('/', authenticate, async (req, res) => {
   try {
@@ -38,13 +47,27 @@ router.post('/', authenticate, async (req, res) => {
     }
 
     const autoDomain = generateDomain(name);
+    const port = await getAvailablePort();
+    
     const result = await db.query(
-      `INSERT INTO containers (user_id, name, status, auto_domain, container_config, notes) 
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [req.user.id, name.trim(), 'running', autoDomain, container_config.trim(), notes || '']
+      `INSERT INTO containers (user_id, name, status, auto_domain, container_config, notes, container_port) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [req.user.id, name.trim(), 'pending', autoDomain, container_config.trim(), notes || '', port]
     );
+    const container = result.rows[0];
 
-    res.status(201).json({ container: result.rows[0], message: 'Container created successfully' });
+    // Async docker deployment
+    try {
+      await execPromise(`/root/deploy_sgtm.sh create ${container.id} ${autoDomain} '${container_config.trim()}' ${port}`);
+      await db.query(`UPDATE containers SET status = 'running' WHERE id = $1`, [container.id]);
+      container.status = 'running';
+    } catch (e) {
+      console.error('Docker deployment failed:', e);
+      await db.query(`UPDATE containers SET status = 'error' WHERE id = $1`, [container.id]);
+      container.status = 'error';
+    }
+
+    res.status(201).json({ container, message: 'Container created successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error creating container' });
@@ -83,8 +106,17 @@ router.put('/:id', authenticate, async (req, res) => {
 // DELETE /api/containers/:id
 router.delete('/:id', authenticate, async (req, res) => {
   try {
-    const result = await db.query('DELETE FROM containers WHERE id = $1 AND user_id = $2 RETURNING id', [req.params.id, req.user.id]);
-    if (result.rows.length === 0) return res.status(404).json({ message: 'Container not found' });
+    const getResult = await db.query('SELECT * FROM containers WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+    if (getResult.rows.length === 0) return res.status(404).json({ message: 'Container not found' });
+    const container = getResult.rows[0];
+
+    try {
+      await execPromise(`/root/deploy_sgtm.sh delete ${container.id} ${container.auto_domain}`);
+    } catch(e) {
+      console.error('Docker delete error', e);
+    }
+
+    await db.query('DELETE FROM containers WHERE id = $1', [container.id]);
     res.json({ message: 'Container deleted' });
   } catch (err) {
     console.error(err);

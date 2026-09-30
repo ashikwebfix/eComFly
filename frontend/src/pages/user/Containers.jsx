@@ -15,22 +15,6 @@ const STATUS_MAP = {
   error: { label: 'Error', badge: 'danger', icon: <FiAlertCircle /> },
 };
 
-// Mock containers for demo
-const MOCK_CONTAINERS = [
-  {
-    id: 'c1', name: 'Main Store Tracking', status: 'running',
-    auto_domain: 'main-abc123.ecomfly.ecomfixr.com', custom_domain: 'track.mystore.com',
-    events_count: 3420, created_at: '2024-10-01T08:00:00Z',
-    container_config: 'aW5mb3JtYXRpb24...', notes: 'Primary tracking container'
-  },
-  {
-    id: 'c2', name: 'Marketing Tracking', status: 'running',
-    auto_domain: 'mktg-xyz789.ecomfly.ecomfixr.com', custom_domain: null,
-    events_count: 1250, created_at: '2024-10-10T09:30:00Z',
-    container_config: '', notes: ''
-  },
-];
-
 export default function UserContainers() {
   const [containers, setContainers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +29,8 @@ export default function UserContainers() {
       const res = await api.get('/containers');
       setContainers(res.data.containers || []);
     } catch {
-      setContainers(MOCK_CONTAINERS);
+      toast.error('Failed to load containers');
+      setContainers([]);
     } finally {
       setLoading(false);
     }
@@ -62,22 +47,7 @@ export default function UserContainers() {
       setShowCreateModal(false);
       setForm({ name: '', container_config: '', notes: '' });
     } catch (err) {
-      // Demo mode
-      const newContainer = {
-        id: `c${Date.now()}`,
-        name: form.name,
-        status: 'pending',
-        auto_domain: `${form.name.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substr(2,6)}.ecomfly.ecomfixr.com`,
-        custom_domain: null,
-        events_count: 0,
-        created_at: new Date().toISOString(),
-        container_config: form.container_config,
-        notes: form.notes,
-      };
-      setContainers(prev => [newContainer, ...prev]);
-      toast.success('Container created! (Demo mode)');
-      setShowCreateModal(false);
-      setForm({ name: '', container_config: '', notes: '' });
+      toast.error(err.response?.data?.message || 'Error creating container');
     } finally {
       setCreating(false);
     }
@@ -89,9 +59,8 @@ export default function UserContainers() {
       await api.delete(`/containers/${id}`);
       setContainers(prev => prev.filter(c => c.id !== id));
       toast.success('Container deleted');
-    } catch {
-      setContainers(prev => prev.filter(c => c.id !== id));
-      toast.success('Container deleted (Demo)');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error deleting container');
     }
   };
 
