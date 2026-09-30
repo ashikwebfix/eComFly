@@ -1,8 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
-const { getUserByEmail, addUser } = require('../models/userStore');
-const { generateToken } = require('../middleware/auth');
+const db = require('../db');
+const { generateToken, authenticate } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -17,27 +16,28 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
 
-    const existing = getUserByEmail(email);
-    if (existing) {
+    const existCheck = await db.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase().trim()]);
+    if (existCheck.rows.length > 0) {
       return res.status(409).json({ message: 'An account with this email already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = addUser({
-      id: uuidv4(),
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      password: hashedPassword,
-      role: 'user',
-      plan_name: 'Free',
-      plan_price: 0,
-      event_limit: 10000,
-      current_events: 0,
-      status: 'active',
-      next_billing: null,
-      created_at: new Date().toISOString(),
-    });
+    // Get default "Free" plan details to assign
+    const planCheck = await db.query("SELECT * FROM plans WHERE name = 'Free'");
+    const defaultPlan = planCheck.rows[0];
+    const plan_id = defaultPlan ? defaultPlan.id : null;
+    const plan_name = defaultPlan ? defaultPlan.name : 'Free';
+    const plan_price = defaultPlan ? defaultPlan.price : 0;
+    const event_limit = defaultPlan ? defaultPlan.event_limit : 10000;
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const insertResult = await db.query(
+      `INSERT INTO users (name, email, password, role, plan_id, plan_name, plan_price, event_limit) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [name.trim(), email.toLowerCase().trim(), hashedPassword, 'user', plan_id, plan_name, plan_price, event_limit]
+    );
+
+    const user = insertResult.rows[0];
     const token = generateToken(user);
     const { password: _, ...safeUser } = user;
 
@@ -56,14 +56,17 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    const user = getUserByEmail(email);
+    const result = await db.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase().trim()]);
+    const user = result.rows[0];
+
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Admin demo password
+    // Admin demo password or hashed password check
     let validPassword = false;
-    if (user.password === 'admin123' && password === 'admin123') {
+    // Check if it's the seed admin which might have a hardcoded hash or plaintext depending on how it was inserted
+    if (user.role === 'admin' && user.password === 'admin123' && password === 'admin123') {
       validPassword = true;
     } else {
       validPassword = await bcrypt.compare(password, user.password);
@@ -88,7 +91,7 @@ router.post('/login', async (req, res) => {
 });
 
 // GET /api/auth/me
-router.get('/me', require('../middleware/auth').authenticate, (req, res) => {
+router.get('/me', authenticate, (req, res) => {
   const { password: _, ...safeUser } = req.user;
   res.json({ user: safeUser });
 });

@@ -1,44 +1,67 @@
 const express = require('express');
+const db = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
-const { getAllUsers, getUserById, updateUser } = require('../models/userStore');
 const router = express.Router();
 
 // GET /api/admin/stats
-router.get('/stats', authenticate, requireAdmin, (req, res) => {
-  const users = getAllUsers();
-  res.json({
-    total_users: users.length,
-    active_users: users.filter(u => u.status === 'active').length,
-    total_containers: 0,
-    total_events_today: Math.floor(Math.random() * 50000 + 10000),
-  });
+router.get('/stats', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const userCountRes = await db.query('SELECT COUNT(*) FROM users');
+    const activeCountRes = await db.query("SELECT COUNT(*) FROM users WHERE status = 'active'");
+    const containerCountRes = await db.query('SELECT COUNT(*) FROM containers');
+    const eventsCountRes = await db.query('SELECT SUM(events_today) as total_events FROM containers');
+    
+    res.json({
+      total_users: parseInt(userCountRes.rows[0].count),
+      active_users: parseInt(activeCountRes.rows[0].count),
+      total_containers: parseInt(containerCountRes.rows[0].count),
+      total_events_today: eventsCountRes.rows[0].total_events ? parseInt(eventsCountRes.rows[0].total_events) : 0,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching stats' });
+  }
 });
 
 // GET /api/admin/users
-router.get('/users', authenticate, requireAdmin, (req, res) => {
-  const users = getAllUsers().map(u => { const {password:_, ...safe} = u; return safe; });
-  res.json({ users, total: users.length });
+router.get('/users', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const result = await db.query('SELECT id, name, email, role, status, plan_name, plan_price, event_limit, current_events, created_at FROM users ORDER BY created_at DESC');
+    res.json({ users: result.rows, total: result.rows.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching users' });
+  }
 });
 
 // GET /api/admin/users/:id
-router.get('/users/:id', authenticate, requireAdmin, (req, res) => {
-  const user = getUserById(req.params.id);
-  if (!user) return res.status(404).json({ message: 'User not found' });
-  const { password: _, ...safe } = user;
-  res.json({ user: safe });
+router.get('/users/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const result = await db.query('SELECT id, name, email, role, status, plan_name, plan_price, event_limit, current_events, created_at FROM users WHERE id = $1', [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
+    res.json({ user: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching user' });
+  }
 });
 
 // PUT /api/admin/users/:id
-router.put('/users/:id', authenticate, requireAdmin, (req, res) => {
-  const { status, plan_name, event_limit } = req.body;
-  const updates = {};
-  if (status) updates.status = status;
-  if (plan_name) updates.plan_name = plan_name;
-  if (event_limit !== undefined) updates.event_limit = parseInt(event_limit);
-  const updated = updateUser(req.params.id, updates);
-  if (!updated) return res.status(404).json({ message: 'User not found' });
-  const { password: _, ...safe } = updated;
-  res.json({ user: safe, message: 'User updated' });
+router.put('/users/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { status, plan_name, event_limit } = req.body;
+    
+    const result = await db.query(
+      `UPDATE users SET status = COALESCE($1, status), plan_name = COALESCE($2, plan_name), event_limit = COALESCE($3, event_limit) WHERE id = $4 RETURNING id, name, email, role, status, plan_name, plan_price, event_limit, current_events, created_at`,
+      [status, plan_name, event_limit !== undefined ? parseInt(event_limit) : null, req.params.id]
+    );
+
+    if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
+    res.json({ user: result.rows[0], message: 'User updated' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error updating user' });
+  }
 });
 
 module.exports = router;

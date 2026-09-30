@@ -1,10 +1,7 @@
 const express = require('express');
-const { v4: uuidv4 } = require('uuid');
+const db = require('../db');
 const { authenticate } = require('../middleware/auth');
 const router = express.Router();
-
-// In-memory container store
-const containers = [];
 
 const generateDomain = (name) => {
   const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').slice(0, 20);
@@ -13,69 +10,98 @@ const generateDomain = (name) => {
 };
 
 // GET /api/containers - List user's containers
-router.get('/', authenticate, (req, res) => {
-  const userContainers = containers.filter(c => c.user_id === req.user.id);
-  res.json({ containers: userContainers, total: userContainers.length });
+router.get('/', authenticate, async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM containers WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]);
+    res.json({ containers: result.rows, total: result.rows.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching containers' });
+  }
 });
 
 // POST /api/containers - Create container
-router.post('/', authenticate, (req, res) => {
-  const { name, container_config, notes } = req.body;
-  if (!name?.trim()) {
-    return res.status(400).json({ message: 'Container name is required' });
-  }
-  if (!container_config?.trim()) {
-    return res.status(400).json({ message: 'Container config is required' });
-  }
+router.post('/', authenticate, async (req, res) => {
+  try {
+    const { name, container_config, notes } = req.body;
+    if (!name?.trim()) return res.status(400).json({ message: 'Container name is required' });
+    if (!container_config?.trim()) return res.status(400).json({ message: 'Container config is required' });
 
-  const container = {
-    id: uuidv4(),
-    user_id: req.user.id,
-    name: name.trim(),
-    status: 'running',
-    auto_domain: generateDomain(name),
-    custom_domain: null,
-    container_config: container_config.trim(),
-    notes: notes || '',
-    events_count: 0,
-    events_today: 0,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+    // Check user container limit
+    const userResult = await db.query('SELECT plan_id FROM users WHERE id = $1', [req.user.id]);
+    const planResult = await db.query('SELECT container_limit FROM plans WHERE id = $1', [userResult.rows[0].plan_id]);
+    const limit = planResult.rows.length > 0 ? planResult.rows[0].container_limit : 1;
+    
+    const countResult = await db.query('SELECT COUNT(*) FROM containers WHERE user_id = $1', [req.user.id]);
+    if (parseInt(countResult.rows[0].count) >= limit && limit !== 0) {
+      return res.status(403).json({ message: 'Container limit reached for your plan' });
+    }
 
-  containers.push(container);
-  res.status(201).json({ container, message: 'Container created successfully' });
+    const autoDomain = generateDomain(name);
+    const result = await db.query(
+      `INSERT INTO containers (user_id, name, status, auto_domain, container_config, notes) 
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [req.user.id, name.trim(), 'running', autoDomain, container_config.trim(), notes || '']
+    );
+
+    res.status(201).json({ container: result.rows[0], message: 'Container created successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error creating container' });
+  }
 });
 
 // GET /api/containers/:id
-router.get('/:id', authenticate, (req, res) => {
-  const container = containers.find(c => c.id === req.params.id && c.user_id === req.user.id);
-  if (!container) return res.status(404).json({ message: 'Container not found' });
-  res.json({ container });
+router.get('/:id', authenticate, async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM containers WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+    if (result.rows.length === 0) return res.status(404).json({ message: 'Container not found' });
+    res.json({ container: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching container' });
+  }
 });
 
 // PUT /api/containers/:id
-router.put('/:id', authenticate, (req, res) => {
-  const idx = containers.findIndex(c => c.id === req.params.id && c.user_id === req.user.id);
-  if (idx === -1) return res.status(404).json({ message: 'Container not found' });
-  containers[idx] = { ...containers[idx], ...req.body, updated_at: new Date().toISOString() };
-  res.json({ container: containers[idx] });
+router.put('/:id', authenticate, async (req, res) => {
+  try {
+    const { name, container_config, notes } = req.body;
+    const result = await db.query(
+      `UPDATE containers SET name = COALESCE($1, name), container_config = COALESCE($2, container_config), notes = COALESCE($3, notes), updated_at = NOW() 
+       WHERE id = $4 AND user_id = $5 RETURNING *`,
+      [name, container_config, notes, req.params.id, req.user.id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ message: 'Container not found' });
+    res.json({ container: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error updating container' });
+  }
 });
 
 // DELETE /api/containers/:id
-router.delete('/:id', authenticate, (req, res) => {
-  const idx = containers.findIndex(c => c.id === req.params.id && c.user_id === req.user.id);
-  if (idx === -1) return res.status(404).json({ message: 'Container not found' });
-  containers.splice(idx, 1);
-  res.json({ message: 'Container deleted' });
+router.delete('/:id', authenticate, async (req, res) => {
+  try {
+    const result = await db.query('DELETE FROM containers WHERE id = $1 AND user_id = $2 RETURNING id', [req.params.id, req.user.id]);
+    if (result.rows.length === 0) return res.status(404).json({ message: 'Container not found' });
+    res.json({ message: 'Container deleted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error deleting container' });
+  }
 });
 
 // POST /api/containers/:id/restart
-router.post('/:id/restart', authenticate, (req, res) => {
-  const container = containers.find(c => c.id === req.params.id && c.user_id === req.user.id);
-  if (!container) return res.status(404).json({ message: 'Container not found' });
-  container.status = 'running';
-  res.json({ message: 'Container restarted', container });
+router.post('/:id/restart', authenticate, async (req, res) => {
+  try {
+    const result = await db.query("UPDATE containers SET status = 'running' WHERE id = $1 AND user_id = $2 RETURNING *", [req.params.id, req.user.id]);
+    if (result.rows.length === 0) return res.status(404).json({ message: 'Container not found' });
+    res.json({ message: 'Container restarted', container: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error restarting container' });
+  }
 });
 
 module.exports = router;

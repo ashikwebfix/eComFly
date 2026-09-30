@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken');
-const { getUserById } = require('../models/userStore');
+const db = require('../db');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'ecomfly_super_secret_key_change_in_production';
 
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'Authentication required' });
@@ -11,7 +11,8 @@ function authenticate(req, res, next) {
   const token = header.slice(7);
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = getUserById(decoded.id);
+    const result = await db.query('SELECT * FROM users WHERE id = $1', [decoded.id]);
+    const user = result.rows[0];
     if (!user) return res.status(401).json({ message: 'User not found' });
     if (user.status === 'suspended') return res.status(403).json({ message: 'Account suspended' });
     req.user = user;
