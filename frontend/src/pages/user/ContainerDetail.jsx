@@ -13,7 +13,7 @@ export default function ContainerDetail() {
   const { id } = useParams();
   const [container] = useState({
     id, name: 'Main Store Tracking', status: 'running',
-    auto_domain: 'main-abc123.ecomfly.io', custom_domain: 'track.mystore.com',
+    auto_domain: 'main-abc123.ecomfly.ecomfixr.com', custom_domain: 'track.mystore.com',
     events_count: 3420, events_today: 142, created_at: '2024-10-01T08:00:00Z',
     gtm_container_id: 'GTM-XXXXXXX', notes: 'Primary tracking container',
     server_region: 'Singapore', container_version: '2.24.0',

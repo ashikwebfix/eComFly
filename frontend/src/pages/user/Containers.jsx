@@ -19,13 +19,13 @@ const STATUS_MAP = {
 const MOCK_CONTAINERS = [
   {
     id: 'c1', name: 'Main Store Tracking', status: 'running',
-    auto_domain: 'main-abc123.ecomfly.io', custom_domain: 'track.mystore.com',
+    auto_domain: 'main-abc123.ecomfly.ecomfixr.com', custom_domain: 'track.mystore.com',
     events_count: 3420, created_at: '2024-10-01T08:00:00Z',
     container_config: 'aW5mb3JtYXRpb24...', notes: 'Primary tracking container'
   },
   {
     id: 'c2', name: 'Marketing Tracking', status: 'running',
-    auto_domain: 'mktg-xyz789.ecomfly.io', custom_domain: null,
+    auto_domain: 'mktg-xyz789.ecomfly.ecomfixr.com', custom_domain: null,
     events_count: 1250, created_at: '2024-10-10T09:30:00Z',
     container_config: '', notes: ''
   },
@@ -67,7 +67,7 @@ export default function UserContainers() {
         id: `c${Date.now()}`,
         name: form.name,
         status: 'pending',
-        auto_domain: `${form.name.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substr(2,6)}.ecomfly.io`,
+        auto_domain: `${form.name.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substr(2,6)}.ecomfly.ecomfixr.com`,
         custom_domain: null,
         events_count: 0,
         created_at: new Date().toISOString(),
@@ -252,7 +252,7 @@ export default function UserContainers() {
                 <div className="alert alert-info mb-lg" style={{marginBottom:'1.25rem'}}>
                   <FiAlertCircle />
                   <div style={{fontSize:'0.82rem'}}>
-                    An auto-generated domain (e.g., <code>abc123.ecomfly.io</code>) will be assigned instantly.
+                    An auto-generated domain (e.g., <code>abc123.ecomfly.ecomfixr.com</code>) will be assigned instantly.
                     You can add your own domain from the Domains section.
                   </div>
                 </div>
