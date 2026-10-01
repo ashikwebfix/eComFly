@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import api from '../../utils/api';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell
@@ -6,24 +8,13 @@ import {
 import { FiTrendingUp, FiZap, FiCalendar, FiBarChart2 } from 'react-icons/fi';
 
 const MONTHLY_DATA = [
-  { month: 'May', events: 5200 },
-  { month: 'Jun', events: 6800 },
-  { month: 'Jul', events: 7400 },
-  { month: 'Aug', events: 6900 },
-  { month: 'Sep', events: 8100 },
-  { month: 'Oct', events: 3420 },
+  { month: 'Last 30 Days', events: 0 }
 ];
 
 const DAILY_DATA = Array.from({length: 30}, (_, i) => ({
   day: i+1,
-  events: Math.floor(Math.random() * 400 + 50),
+  events: 0,
 }));
-
-const CONTAINER_BREAKDOWN = [
-  { name: 'Main Store', value: 3420, color: '#6366f1' },
-  { name: 'Marketing', value: 1250, color: '#06b6d4' },
-  { name: 'Other', value: 430, color: '#10b981' },
-];
 
 const CustomTooltip = ({active, payload, label}) => {
   if (active && payload?.length) {
@@ -37,11 +28,39 @@ const CustomTooltip = ({active, payload, label}) => {
   return null;
 };
 
+// Generate some basic colors for the pie chart
+const COLORS = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+
 export default function UserUsage() {
   const { user } = useAuth();
+  const [containers, setContainers] = useState([]);
+  
+  useEffect(() => {
+    fetchContainers();
+  }, []);
+
+  const fetchContainers = async () => {
+    try {
+      const res = await api.get('/containers');
+      setContainers(res.data.containers || []);
+    } catch {
+      setContainers([]);
+    }
+  };
+
   const eventLimit = user?.event_limit || 10000;
-  const currentEvents = user?.current_events || 5100;
+  const currentEvents = user?.current_events || 0;
   const usagePct = Math.min(100, Math.round((currentEvents / eventLimit) * 100));
+
+  const containerBreakdown = containers.map((c, i) => ({
+    name: c.name,
+    value: c.events_count || 0,
+    color: COLORS[i % COLORS.length]
+  })).filter(c => c.value > 0);
+
+  if (containerBreakdown.length === 0) {
+    containerBreakdown.push({ name: 'No Events', value: 1, color: 'rgba(255,255,255,0.1)' });
+  }
 
   return (
     <div style={{maxWidth:1200}}>
@@ -62,17 +81,17 @@ export default function UserUsage() {
         </div>
         <div className="stat-card cyan">
           <div className="stat-icon cyan"><FiBarChart2 /></div>
-          <div className="stat-value">{(eventLimit - currentEvents).toLocaleString()}</div>
+          <div className="stat-value">{Math.max(0, eventLimit - currentEvents).toLocaleString()}</div>
           <div className="stat-label">Remaining Events</div>
         </div>
         <div className="stat-card green">
           <div className="stat-icon green"><FiTrendingUp /></div>
-          <div className="stat-value">170</div>
+          <div className="stat-value">{Math.round(currentEvents / 30)}</div>
           <div className="stat-label">Avg Events/Day</div>
         </div>
         <div className="stat-card amber">
           <div className="stat-icon amber"><FiCalendar /></div>
-          <div className="stat-value">Nov 1</div>
+          <div className="stat-value">End of Month</div>
           <div className="stat-label">Resets On</div>
         </div>
       </div>
@@ -131,8 +150,8 @@ export default function UserUsage() {
           </div>
           <ResponsiveContainer width="100%" height={160}>
             <PieChart>
-              <Pie data={CONTAINER_BREAKDOWN} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={4}>
-                {CONTAINER_BREAKDOWN.map((entry, i) => (
+              <Pie data={containerBreakdown} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={4}>
+                {containerBreakdown.map((entry, i) => (
                   <Cell key={i} fill={entry.color} />
                 ))}
               </Pie>
@@ -140,7 +159,7 @@ export default function UserUsage() {
             </PieChart>
           </ResponsiveContainer>
           <div style={{display:'flex',flexDirection:'column',gap:'0.5rem',marginTop:'0.75rem'}}>
-            {CONTAINER_BREAKDOWN.map((c, i) => (
+            {containerBreakdown.filter(c => c.name !== 'No Events').map((c, i) => (
               <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',fontSize:'0.82rem'}}>
                 <div style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
                   <div style={{width:10,height:10,borderRadius:2,background:c.color,flexShrink:0}} />

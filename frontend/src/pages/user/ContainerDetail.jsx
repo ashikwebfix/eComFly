@@ -3,10 +3,11 @@ import { useParams, Link } from 'react-router-dom';
 import { FiArrowLeft, FiCopy, FiExternalLink, FiServer, FiGlobe, FiZap, FiRefreshCw } from 'react-icons/fi';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
+import api from '../../utils/api';
 
 const CHART_DATA = Array.from({length: 24}, (_, i) => ({
   hour: `${i}:00`,
-  events: Math.floor(Math.random() * 200 + 10),
+  events: 0,
 }));
 
 export default function ContainerDetail() {

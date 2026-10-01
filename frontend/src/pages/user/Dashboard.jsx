@@ -11,9 +11,9 @@ import {
 import api from '../../utils/api';
 import './Dashboard.css';
 
-const MOCK_CHART = Array.from({length: 30}, (_, i) => ({
+const CHART_DATA = Array.from({length: 30}, (_, i) => ({
   day: `${i+1}`,
-  events: Math.floor(Math.random() * 800 + 200),
+  events: 0,
 }));
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -47,7 +47,7 @@ export default function UserDashboard() {
       setStats({
         containers: contRes.data.containers?.length || 0,
         activeDomains: contRes.data.containers?.filter(c => c.custom_domain)?.length || 0,
-        eventsToday: Math.floor(Math.random() * 500 + 100),
+        eventsToday: contRes.data.containers?.reduce((sum, c) => sum + (c.events_today || 0), 0) || 0,
       });
     } catch {
       // Use mock data for demo
@@ -135,7 +135,7 @@ export default function UserDashboard() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={MOCK_CHART} margin={{top:5, right:10, left:0, bottom:5}}>
+            <AreaChart data={CHART_DATA} margin={{top:5, right:10, left:0, bottom:5}}>
               <defs>
                 <linearGradient id="eventGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>

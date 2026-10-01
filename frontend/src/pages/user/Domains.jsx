@@ -3,10 +3,7 @@ import toast from 'react-hot-toast';
 import { FiGlobe, FiPlus, FiTrash2, FiCopy, FiX, FiAlertCircle, FiCheckCircle, FiInfo } from 'react-icons/fi';
 import api from '../../utils/api';
 
-const MOCK_DOMAINS = [
-  { id: 'd1', domain: 'track.mystore.com', container_name: 'Main Store Tracking', status: 'active', verified: true, created_at: '2024-10-05' },
-  { id: 'd2', domain: 'analytics.brandsite.com', container_name: 'Marketing Tracking', status: 'pending', verified: false, created_at: '2024-10-12' },
-];
+
 
 const SERVER_IP = '45.134.211.80'; // Example IP
 
@@ -18,36 +15,45 @@ export default function UserDomains() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setDomains(MOCK_DOMAINS);
+    fetchDomains();
     api.get('/containers').then(r => setContainers(r.data.containers || [])).catch(() => {});
   }, []);
+
+  const fetchDomains = async () => {
+    try {
+      const res = await api.get('/domains');
+      setDomains(res.data.domains || []);
+    } catch {
+      toast.error('Failed to load domains');
+    }
+  };
 
   const addDomain = async (e) => {
     e.preventDefault();
     if (!form.domain.trim()) return toast.error('Domain required');
     setLoading(true);
     try {
-      await api.post('/domains', form);
+      const res = await api.post('/domains', form);
       toast.success('Domain added! Point your DNS A record to verify.');
-      setShowModal(false);
-    } catch {
-      const newDomain = {
-        id: `d${Date.now()}`, domain: form.domain, container_name: 'Demo Container',
-        status: 'pending', verified: false, created_at: new Date().toISOString().split('T')[0]
-      };
-      setDomains(prev => [newDomain, ...prev]);
-      toast.success('Domain added! Point DNS A record to verify. (Demo)');
+      setDomains(prev => [res.data.domain, ...prev]);
       setShowModal(false);
       setForm({ domain: '', container_id: '' });
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to add domain');
     } finally {
       setLoading(false);
     }
   };
 
-  const removeDomain = (id) => {
+  const removeDomain = async (id) => {
     if (!confirm('Remove this domain?')) return;
-    setDomains(prev => prev.filter(d => d.id !== id));
-    toast.success('Domain removed');
+    try {
+      await api.delete(`/domains/${id}`);
+      setDomains(prev => prev.filter(d => d.id !== id));
+      toast.success('Domain removed');
+    } catch {
+      toast.error('Failed to remove domain');
+    }
   };
 
   return (
@@ -139,7 +145,7 @@ export default function UserDomains() {
                         : <span style={{color:'var(--warning-light)',display:'flex',alignItems:'center',gap:'4px'}}><FiAlertCircle />Pending DNS</span>
                       }
                     </td>
-                    <td>{d.created_at}</td>
+                    <td>{new Date(d.created_at).toLocaleDateString()}</td>
                     <td>
                       <button className="btn btn-danger btn-sm" onClick={() => removeDomain(d.id)}>
                         <FiTrash2 />

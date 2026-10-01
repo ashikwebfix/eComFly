@@ -1,27 +1,50 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiUsers, FiServer, FiZap, FiDollarSign, FiTrendingUp, FiAlertCircle, FiArrowRight } from 'react-icons/fi';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import api from '../../utils/api';
 
 const CHART_DATA = Array.from({length:30}, (_, i) => ({
   day: i+1,
-  events: Math.floor(Math.random()*8000+2000),
-  users: Math.floor(Math.random()*5+1),
+  events: 0,
+  users: 0,
 }));
 
-const RECENT_SIGNUPS = [
-  { id:'u1', name:'Ahmed Hassan', email:'ahmed@store.com', plan:'Starter', containers:2, joined:'2024-10-28', status:'active' },
-  { id:'u2', name:'Sara Islam', email:'sara@brand.com', plan:'Free', containers:1, joined:'2024-10-27', status:'active' },
-  { id:'u3', name:'Rahim Uddin', email:'rahim@shop.com', plan:'Pro', containers:5, joined:'2024-10-26', status:'active' },
-  { id:'u4', name:'Fatima Khatun', email:'fatima@market.com', plan:'Free', containers:1, joined:'2024-10-25', status:'pending' },
-];
-
 export default function AdminDashboard() {
-  const stats = [
-    { label:'Total Users', value:'247', change:'+12', color:'indigo', icon:<FiUsers /> },
-    { label:'Active Containers', value:'189', change:'+8', color:'cyan', icon:<FiServer /> },
-    { label:'Events Today', value:'48,291', change:'+5%', color:'green', icon:<FiZap /> },
-    { label:'Revenue (Month)', value:'৳87,100', change:'+18%', color:'amber', icon:<span style={{fontWeight:'bold'}}>TK</span> },
+  const [stats, setStats] = useState({
+    total_users: 0,
+    active_users: 0,
+    total_containers: 0,
+    total_events_today: 0,
+  });
+  const [recentSignups, setRecentSignups] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAdminData();
+  }, []);
+
+  const fetchAdminData = async () => {
+    try {
+      const [statsRes, usersRes] = await Promise.all([
+        api.get('/admin/stats'),
+        api.get('/admin/users')
+      ]);
+      setStats(statsRes.data);
+      // Get most recent 5 users
+      setRecentSignups(usersRes.data.users?.slice(0, 5) || []);
+    } catch (err) {
+      console.error('Failed to load admin data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const dashboardStats = [
+    { label:'Total Users', value: stats.total_users, change: 'Live', color:'indigo', icon:<FiUsers /> },
+    { label:'Active Containers', value: stats.total_containers, change:'Live', color:'cyan', icon:<FiServer /> },
+    { label:'Events Today', value: stats.total_events_today.toLocaleString(), change:'Live', color:'green', icon:<FiZap /> },
+    { label:'Active Users', value: stats.active_users, change:'Live', color:'amber', icon:<FiUsers /> },
   ];
 
   return (
@@ -39,7 +62,7 @@ export default function AdminDashboard() {
 
       {/* Stats */}
       <div className="grid grid-4 gap-lg" style={{marginBottom:'1.5rem'}}>
-        {stats.map((s,i) => (
+        {dashboardStats.map((s,i) => (
           <div key={i} className={`stat-card ${s.color}`}>
             <div className={`stat-icon ${s.color}`}>{s.icon}</div>
             <div className="stat-value">{s.value}</div>
@@ -76,10 +99,7 @@ export default function AdminDashboard() {
           <div className="card-header"><h3 className="card-title">Plan Distribution</h3></div>
           <div style={{display:'flex',flexDirection:'column',gap:'0.875rem',padding:'0.5rem 0'}}>
             {[
-              {plan:'Free', count:142, pct:57, color:'var(--text-muted)'},
-              {plan:'Starter', count:68, pct:28, color:'var(--primary)'},
-              {plan:'Pro', count:30, pct:12, color:'var(--accent)'},
-              {plan:'Enterprise', count:7, pct:3, color:'var(--warning)'},
+              {plan:'Free', count: stats.total_users, pct: 100, color:'var(--text-muted)'},
             ].map((p,i) => (
               <div key={i}>
                 <div style={{display:'flex',justifyContent:'space-between',fontSize:'0.82rem',marginBottom:'4px'}}>
@@ -95,28 +115,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Alerts */}
-      <div className="card" style={{marginBottom:'1.5rem',border:'1px solid rgba(245,158,11,0.2)',background:'rgba(245,158,11,0.04)'}}>
-        <div className="card-header">
-          <div style={{display:'flex',alignItems:'center',gap:'0.5rem',color:'var(--warning-light)'}}>
-            <FiAlertCircle />
-            <h3 className="card-title" style={{color:'var(--warning-light)'}}>Pending Actions</h3>
-          </div>
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'1rem'}}>
-          {[
-            {label:'Pending Payments', count:4, link:'/admin/payments'},
-            {label:'Unverified Domains', count:2, link:'/admin/containers'},
-            {label:'Support Requests', count:1, link:'/admin/users'},
-          ].map((item,i) => (
-            <Link key={i} to={item.link} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0.875rem',background:'rgba(245,158,11,0.06)',border:'1px solid rgba(245,158,11,0.15)',borderRadius:'var(--radius-md)',textDecoration:'none',transition:'all 0.2s'}}>
-              <span style={{fontSize:'0.875rem',color:'var(--text-secondary)'}}>{item.label}</span>
-              <span style={{fontWeight:800,color:'var(--warning-light)',fontSize:'1.1rem'}}>{item.count}</span>
-            </Link>
-          ))}
-        </div>
-      </div>
-
       {/* Recent Signups */}
       <div className="card">
         <div className="card-header">
@@ -129,14 +127,14 @@ export default function AdminDashboard() {
               <tr>
                 <th>User</th>
                 <th>Plan</th>
-                <th>Containers</th>
+                <th>Events limit</th>
                 <th>Joined</th>
                 <th>Status</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {RECENT_SIGNUPS.map(u => (
+              {recentSignups.map(u => (
                 <tr key={u.id}>
                   <td>
                     <div style={{display:'flex',alignItems:'center',gap:'0.75rem'}}>
@@ -149,9 +147,9 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </td>
-                  <td><span className={`badge badge-${u.plan === 'Pro' ? 'info' : u.plan === 'Starter' ? 'primary' : 'neutral'}`}>{u.plan}</span></td>
-                  <td>{u.containers}</td>
-                  <td style={{fontSize:'0.82rem'}}>{u.joined}</td>
+                  <td><span className={`badge badge-${u.plan_name === 'Pro' ? 'info' : u.plan_name === 'Starter' ? 'primary' : 'neutral'}`}>{u.plan_name || 'Free'}</span></td>
+                  <td>{u.event_limit}</td>
+                  <td style={{fontSize:'0.82rem'}}>{new Date(u.created_at).toLocaleDateString()}</td>
                   <td><span className={`badge badge-${u.status === 'active' ? 'success' : 'warning'}`}>{u.status}</span></td>
                   <td><Link to={`/admin/users/${u.id}`} className="btn btn-ghost btn-sm">View <FiArrowRight /></Link></td>
                 </tr>
