@@ -74,7 +74,7 @@ export default function AdminPayments() {
         {[
           {label:'Pending Review', value:pendingCount, color:'amber', icon:<FiClock />},
           {label:'Approved (Month)', value:payments.filter(p=>p.status==='approved').length, color:'green', icon:<FiCheckCircle />},
-          {label:'Total Revenue', value:`৳${totalRevenue.toLocaleString()}`, color:'indigo', icon:<FiDollarSign />},
+          {label:'Total Revenue', value:`৳${totalRevenue.toLocaleString()}`, color:'indigo', icon:<span style={{fontWeight:'bold'}}>TK</span>},
           {label:'Rejected', value:payments.filter(p=>p.status==='rejected').length, color:'red', icon:<FiX />},
         ].map((s,i) => (
           <div key={i} className={`stat-card ${s.color}`}>
@@ -159,7 +159,7 @@ export default function AdminPayments() {
         </div>
         {!loading && filtered.length === 0 && (
           <div className="empty-state">
-            <div className="empty-state-icon"><FiDollarSign /></div>
+            <div className="empty-state-icon"><span style={{fontWeight:'bold'}}>TK</span></div>
             <div className="empty-state-title">No payments found</div>
           </div>
         )}

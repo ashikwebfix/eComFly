@@ -21,7 +21,7 @@ export default function AdminDashboard() {
     { label:'Total Users', value:'247', change:'+12', color:'indigo', icon:<FiUsers /> },
     { label:'Active Containers', value:'189', change:'+8', color:'cyan', icon:<FiServer /> },
     { label:'Events Today', value:'48,291', change:'+5%', color:'green', icon:<FiZap /> },
-    { label:'Revenue (Month)', value:'৳87,100', change:'+18%', color:'amber', icon:<FiDollarSign /> },
+    { label:'Revenue (Month)', value:'৳87,100', change:'+18%', color:'amber', icon:<span style={{fontWeight:'bold'}}>TK</span> },
   ];
 
   return (
@@ -33,7 +33,7 @@ export default function AdminDashboard() {
         </div>
         <div style={{display:'flex',gap:'0.75rem'}}>
           <Link to="/admin/users" className="btn btn-secondary btn-sm"><FiUsers /> Manage Users</Link>
-          <Link to="/admin/plans" className="btn btn-primary btn-sm"><FiDollarSign /> Manage Plans</Link>
+          <Link to="/admin/plans" className="btn btn-primary btn-sm"><span style={{fontWeight:'bold'}}>TK</span> Manage Plans</Link>
         </div>
       </div>
 

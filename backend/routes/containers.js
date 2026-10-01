@@ -56,18 +56,18 @@ router.post('/', authenticate, async (req, res) => {
     );
     const container = result.rows[0];
 
-    // Async docker deployment
-    try {
-      await execPromise(`/root/deploy_sgtm.sh create ${container.id} ${autoDomain} '${container_config.trim()}' ${port}`);
-      await db.query(`UPDATE containers SET status = 'running' WHERE id = $1`, [container.id]);
-      container.status = 'running';
-    } catch (e) {
-      console.error('Docker deployment failed:', e);
-      await db.query(`UPDATE containers SET status = 'error' WHERE id = $1`, [container.id]);
-      container.status = 'error';
-    }
+    // Run docker deployment in the background so it doesn't block the API response
+    (async () => {
+      try {
+        await execPromise(`/root/deploy_sgtm.sh create ${container.id} ${autoDomain} '${container_config.trim()}' ${port}`);
+        await db.query(`UPDATE containers SET status = 'running' WHERE id = $1`, [container.id]);
+      } catch (e) {
+        console.error('Docker deployment failed:', e);
+        await db.query(`UPDATE containers SET status = 'error' WHERE id = $1`, [container.id]);
+      }
+    })();
 
-    res.status(201).json({ container, message: 'Container created successfully' });
+    res.status(201).json({ container, message: 'Container creation started. It will be ready in a minute.' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error creating container' });
