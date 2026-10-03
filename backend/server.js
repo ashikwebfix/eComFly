@@ -70,6 +70,9 @@ app.listen(PORT, () => {
   console.log(`\n🚀 eComFly API running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'PostgreSQL' : 'In-memory (demo)'}\n`);
+  if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
+    require('./eventCounter').start();
+  }
 });
 
 module.exports = app;
