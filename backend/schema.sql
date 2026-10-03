@@ -112,5 +112,5 @@ ON CONFLICT DO NOTHING;
 
 -- Seed admin user (password: admin123)
 INSERT INTO users (name, email, password, role, plan_name, event_limit)
-VALUES ('Admin User', 'admin@ecomfly.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin', 'Enterprise', 0)
+VALUES ('Admin User', 'admin@ecomfly.com', '$2a$10$jrhcH61qVbnqNsCY7IuNgOXUNP/CWtJcPItExQYKAwPoeCyYjnv1O', 'admin', 'Enterprise', 0)
 ON CONFLICT (email) DO NOTHING;
