@@ -23,6 +23,7 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -107,14 +108,40 @@ export default function DashboardLayout() {
             </div>
 
             {/* Notifications */}
-            <button className="header-icon-btn" aria-label="Notifications">
-              <FiBell />
-              <span className="notif-dot" />
-            </button>
+            <div className="notif-wrapper" style={{ position: 'relative' }}>
+              <button 
+                className="header-icon-btn" 
+                aria-label="Notifications"
+                onClick={() => {
+                  setNotifOpen(!notifOpen);
+                  setUserMenuOpen(false);
+                }}
+              >
+                <FiBell />
+                <span className="notif-dot" />
+              </button>
+
+              {notifOpen && (
+                <div className="user-dropdown" style={{ minWidth: '280px' }}>
+                  <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: '600', fontSize: '0.9rem' }}>
+                    Notifications
+                  </div>
+                  <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                    No new notifications right now.
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* User Menu */}
             <div className="user-menu-wrapper">
-              <button className="user-menu-trigger" onClick={() => setUserMenuOpen(!userMenuOpen)}>
+              <button 
+                className="user-menu-trigger" 
+                onClick={() => {
+                  setUserMenuOpen(!userMenuOpen);
+                  setNotifOpen(false);
+                }}
+              >
                 <div className="user-avatar">
                   {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>

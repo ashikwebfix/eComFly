@@ -1,14 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { FiArrowLeft, FiEdit, FiSave, FiServer, FiZap, FiCreditCard, FiX } from 'react-icons/fi';
-
-const USER_DATA = {
-  u1: { id:'u1', name:'Ahmed Hassan', email:'ahmed@store.com', plan:'Starter', plan_id:'p2', containers:2, events:32400, eventLimit:100000, joined:'2024-10-28', status:'active', lastLogin:'2024-10-29', paymentHistory:[
-    {date:'2024-10-01', amount:2900, method:'bKash', status:'paid'},
-    {date:'2024-09-01', amount:2900, method:'Bank Transfer', status:'paid'},
-  ]},
-};
 
 const PLANS = [
   { id:'p1', name:'Free', event_limit:10000 },
@@ -19,23 +12,88 @@ const PLANS = [
 
 export default function AdminUserDetail() {
   const { id } = useParams();
-  const userData = USER_DATA[id] || {
-    id, name:'Unknown User', email:'unknown@example.com', plan:'Free', plan_id:'p1',
-    containers:0, events:0, eventLimit:10000, joined:'2024-10-01', status:'active',
-    lastLogin:'2024-10-01', paymentHistory:[]
-  };
-
-  const [user, setUser] = useState(userData);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [editPlan, setEditPlan] = useState(false);
-  const [newPlanId, setNewPlanId] = useState(user.plan_id);
-  const [newLimit, setNewLimit] = useState(user.eventLimit);
+  const [newPlanName, setNewPlanName] = useState('');
+  const [newLimit, setNewLimit] = useState(0);
 
-  const saveChanges = () => {
-    const plan = PLANS.find(p => p.id === newPlanId);
-    setUser(prev => ({...prev, plan: plan?.name || prev.plan, plan_id: newPlanId, eventLimit: newLimit}));
-    setEditPlan(false);
-    toast.success('User plan updated!');
+  useEffect(() => {
+    fetchUser();
+  }, [id]);
+
+  const fetchUser = async () => {
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch user');
+      const data = await res.json();
+      setUser({
+        ...data.user,
+        plan: data.user.plan_name,
+        events: data.user.current_events || 0,
+        eventLimit: data.user.event_limit || 0,
+        joined: new Date(data.user.created_at).toISOString().split('T')[0],
+        lastLogin: new Date(data.user.created_at).toISOString().split('T')[0], // placeholder
+        containers: data.user.containers || 0,
+        paymentHistory: data.user.paymentHistory || []
+      });
+      setNewPlanName(data.user.plan_name);
+      setNewLimit(data.user.event_limit);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load user details');
+      setLoading(false);
+    }
   };
+
+  const saveChanges = async () => {
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          plan_name: newPlanName,
+          event_limit: newLimit
+        })
+      });
+      if (!res.ok) throw new Error('Failed to update user');
+      toast.success('User plan updated!');
+      setEditPlan(false);
+      fetchUser();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update user');
+    }
+  };
+
+  const toggleStatus = async () => {
+    try {
+      const newStatus = user.status === 'active' ? 'suspended' : 'active';
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (!res.ok) throw new Error('Failed to update status');
+      toast.success(`User ${newStatus}`);
+      fetchUser();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update status');
+    }
+  };
+
+  if (loading) return <div style={{padding:'2rem'}}>Loading user details...</div>;
+  if (!user) return <div style={{padding:'2rem'}}>User not found</div>;
 
   return (
     <div style={{maxWidth:1100}}>
@@ -65,7 +123,7 @@ export default function AdminUserDetail() {
             {[
               { label:'Containers', value:user.containers, icon:<FiServer />, color:'indigo' },
               { label:'Events (Month)', value:user.events.toLocaleString(), icon:<FiZap />, color:'cyan' },
-              { label:'Usage', value:`${Math.round(user.events/user.eventLimit*100)}%`, icon:<FiZap />, color:'amber' },
+              { label:'Usage', value:`${user.eventLimit > 0 ? Math.round(user.events/user.eventLimit*100) : 0}%`, icon:<FiZap />, color:'amber' },
             ].map((s,i) => (
               <div key={i} className={`stat-card ${s.color}`}>
                 <div className={`stat-icon ${s.color}`}>{s.icon}</div>
@@ -90,12 +148,12 @@ export default function AdminUserDetail() {
               <div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
                 <div className="form-group">
                   <label className="form-label">Plan</label>
-                  <select className="form-select" value={newPlanId} onChange={e => {
-                    setNewPlanId(e.target.value);
-                    const plan = PLANS.find(p => p.id === e.target.value);
+                  <select className="form-select" value={newPlanName} onChange={e => {
+                    setNewPlanName(e.target.value);
+                    const plan = PLANS.find(p => p.name === e.target.value);
                     if (plan) setNewLimit(plan.event_limit);
                   }}>
-                    {PLANS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    {PLANS.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
@@ -178,10 +236,7 @@ export default function AdminUserDetail() {
               </button>
               <button className={`btn w-full ${user.status === 'active' ? 'btn-danger' : 'btn-success'}`}
                 style={{justifyContent:'center'}}
-                onClick={() => {
-                  setUser(prev => ({...prev, status: prev.status === 'active' ? 'suspended' : 'active'}));
-                  toast.success(`User ${user.status === 'active' ? 'suspended' : 'activated'}`);
-                }}>
+                onClick={toggleStatus}>
                 {user.status === 'active' ? 'Suspend Account' : 'Activate Account'}
               </button>
               <button className="btn btn-danger w-full" style={{justifyContent:'center'}}

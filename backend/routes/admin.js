@@ -37,9 +37,22 @@ router.get('/users', authenticate, requireAdmin, async (req, res) => {
 // GET /api/admin/users/:id
 router.get('/users/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    const result = await db.query('SELECT id, name, email, role, status, plan_name, plan_price, event_limit, current_events, created_at FROM users WHERE id = $1', [req.params.id]);
+    const result = await db.query('SELECT id, name, email, role, status, plan_id, plan_name, plan_price, event_limit, current_events, created_at, next_billing_date FROM users WHERE id = $1', [req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
-    res.json({ user: result.rows[0] });
+    const user = result.rows[0];
+
+    const containerResult = await db.query('SELECT COUNT(*) as count FROM containers WHERE user_id = $1', [req.params.id]);
+    user.containers = parseInt(containerResult.rows[0].count);
+
+    const paymentResult = await db.query('SELECT amount, method, status, created_at as date FROM payments WHERE user_id = $1 ORDER BY created_at DESC', [req.params.id]);
+    user.paymentHistory = paymentResult.rows.map(p => ({
+      amount: p.amount,
+      method: p.method,
+      status: p.status,
+      date: new Date(p.date).toISOString().split('T')[0]
+    }));
+
+    res.json({ user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error fetching user' });

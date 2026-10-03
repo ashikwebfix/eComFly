@@ -6,6 +6,7 @@ import {
 } from 'react-icons/fi';
 import api from '../../utils/api';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import './Containers.css';
 
 const STATUS_MAP = {
@@ -16,6 +17,7 @@ const STATUS_MAP = {
 };
 
 export default function UserContainers() {
+  const { user } = useAuth();
   const [containers, setContainers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -76,9 +78,19 @@ export default function UserContainers() {
           <h1 className="page-title">Containers</h1>
           <p className="page-subtitle">Manage your sGTM server-side tracking containers</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-          <FiPlus /> Create Container
-        </button>
+        <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
+          <div style={{fontSize:'0.85rem', color:'var(--text-secondary)'}}>
+            <strong>{containers.length}</strong> / {user?.container_limit || 1} Containers Used
+          </div>
+          <button 
+            className="btn btn-primary" 
+            onClick={() => setShowCreateModal(true)}
+            disabled={containers.length >= (user?.container_limit || 1)}
+            title={containers.length >= (user?.container_limit || 1) ? "Container limit reached. Upgrade your plan." : ""}
+          >
+            <FiPlus /> Create Container
+          </button>
+        </div>
       </div>
 
       {/* Info Banner */}
@@ -199,12 +211,14 @@ export default function UserContainers() {
           })}
 
           {/* Add new card */}
-          <button className="container-card new-container-card" onClick={() => setShowCreateModal(true)}>
-            <div className="new-container-inner">
-              <div className="new-container-icon"><FiPlus /></div>
-              <span>Create New Container</span>
-            </div>
-          </button>
+          {containers.length < (user?.container_limit || 1) && (
+            <button className="container-card new-container-card" onClick={() => setShowCreateModal(true)}>
+              <div className="new-container-inner">
+                <div className="new-container-icon"><FiPlus /></div>
+                <span>Create New Container</span>
+              </div>
+            </button>
+          )}
         </div>
       )}
 
