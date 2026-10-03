@@ -4,10 +4,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import {
   FiGrid, FiServer, FiGlobe, FiCreditCard, FiBarChart2,
-  FiSettings, FiLogOut, FiMenu, FiX, FiBell, FiChevronDown, FiAlertCircle
+  FiSettings, FiLogOut, FiMenu, FiX, FiBell, FiChevronDown, FiAlertCircle, FiSun, FiMoon
 } from 'react-icons/fi';
 import { RiRadarLine } from 'react-icons/ri';
 import api from '../../utils/api';
+import { useTheme } from '../../contexts/ThemeContext';
 import './DashboardLayout.css';
 
 const NAV_ITEMS = [
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -118,6 +120,15 @@ export default function DashboardLayout() {
                 />
               </div>
             </div>
+
+            {/* Theme Toggle */}
+            <button 
+              className="header-icon-btn" 
+              aria-label="Toggle Theme"
+              onClick={toggleTheme}
+            >
+              {theme === 'dark' ? <FiSun /> : <FiMoon />}
+            </button>
 
             {/* Notifications */}
             <div 

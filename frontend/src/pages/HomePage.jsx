@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FiServer, FiZap, FiShield, FiGlobe, FiBarChart2, FiCheck,
-  FiArrowRight, FiStar, FiMail, FiTwitter, FiLinkedin, FiMenu, FiX
+  FiArrowRight, FiStar, FiMail, FiTwitter, FiLinkedin, FiMenu, FiX, FiSun, FiMoon
 } from 'react-icons/fi';
 import { RiRocketLine, RiRadarLine, RiSpeedLine } from 'react-icons/ri';
+import { useTheme } from '../contexts/ThemeContext';
 import './HomePage.css';
 
 const PLANS = [
@@ -142,6 +143,7 @@ const STATS = [
 export default function HomePage() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const [activeFaq, setActiveFaq] = useState(null);
 
   useEffect(() => {
@@ -196,6 +198,14 @@ export default function HomePage() {
           </div>
 
           <div className="nav-actions">
+            <button 
+              className="btn btn-secondary btn-sm" 
+              style={{ padding: '0.4rem 0.6rem' }} 
+              onClick={toggleTheme}
+              aria-label="Toggle Theme"
+            >
+              {theme === 'dark' ? <FiSun /> : <FiMoon />}
+            </button>
             <Link to="/login" className="btn btn-secondary btn-sm">Sign In</Link>
             <Link to="/register" className="btn btn-primary btn-sm">Get Started Free</Link>
           </div>
