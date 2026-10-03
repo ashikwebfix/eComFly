@@ -100,10 +100,8 @@ router.get('/me', authenticate, async (req, res) => {
       const p = await db.query('SELECT name, price, event_limit, container_limit, domain_limit FROM plans WHERE id = $1', [req.user.plan_id]);
       if (p.rows.length > 0) {
         const plan = p.rows[0];
-        // The plan is the source of truth for name, price and limits
-        safeUser.plan_name = plan.name;
-        safeUser.plan_price = plan.price;
-        safeUser.event_limit = plan.event_limit;
+        // We only append container and domain limits from the plans table,
+        // because plan_name, plan_price, and event_limit can be explicitly overridden for a user.
         safeUser.container_limit = plan.container_limit;
         safeUser.domain_limit = plan.domain_limit;
       }

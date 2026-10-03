@@ -202,7 +202,7 @@ export default function UserBilling() {
               {/* Payment Method Selector */}
               <div style={{marginBottom:'1.5rem'}}>
                 <label className="form-label">Select Payment Method</label>
-                <div style={{display:'flex',gap:'0.75rem'}}>
+                <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(130px, 1fr))', gap:'0.75rem'}}>
                   {['bKash', 'Nagad', 'Bank'].map(m => (
                     <button key={m}
                       className={`payment-method-btn ${paymentMethod === m ? 'active' : ''}`}
