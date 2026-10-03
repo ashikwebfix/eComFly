@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import {
   FiGrid, FiServer, FiGlobe, FiCreditCard, FiBarChart2,
-  FiSettings, FiLogOut, FiMenu, FiX, FiBell, FiChevronDown
+  FiSettings, FiLogOut, FiMenu, FiX, FiBell, FiChevronDown, FiAlertCircle
 } from 'react-icons/fi';
 import { RiRadarLine } from 'react-icons/ri';
+import api from '../../utils/api';
 import './DashboardLayout.css';
 
 const NAV_ITEMS = [
@@ -24,6 +25,17 @@ export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    if (user) {
+      api.get('/user/notifications')
+        .then(res => {
+          setNotifications(res.data.notifications || []);
+        })
+        .catch(err => console.error('Failed to fetch notifications', err));
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -118,16 +130,36 @@ export default function DashboardLayout() {
                 }}
               >
                 <FiBell />
-                <span className="notif-dot" />
+                {notifications.length > 0 && <span className="notif-dot" />}
               </button>
 
               {notifOpen && (
-                <div className="user-dropdown" style={{ minWidth: '280px' }}>
-                  <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: '600', fontSize: '0.9rem' }}>
-                    Notifications
+                <div className="user-dropdown" style={{ minWidth: '320px', right: '-10px', top: 'calc(100% + 12px)' }}>
+                  <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: '600', fontSize: '0.9rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Notifications</span>
+                    {notifications.length > 0 && (
+                      <span className="badge badge-primary">{notifications.length}</span>
+                    )}
                   </div>
-                  <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    No new notifications right now.
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {notifications.length === 0 ? (
+                      <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                        No new notifications right now.
+                      </div>
+                    ) : (
+                      notifications.map(n => (
+                        <div key={n.id} style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', gap: '0.75rem' }}>
+                          <div style={{ marginTop: '2px', color: n.type === 'error' ? 'var(--danger-light)' : n.type === 'warning' ? 'var(--warning-light)' : 'var(--primary-light)' }}>
+                            <FiAlertCircle />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>{n.title}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>{n.message}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '6px' }}>{new Date(n.date).toLocaleDateString()}</div>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}

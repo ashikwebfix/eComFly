@@ -87,6 +87,50 @@ router.get('/usage', authenticate, async (req, res) => {
   }
 });
 
+// GET /api/user/notifications
+router.get('/notifications', authenticate, async (req, res) => {
+  try {
+    const notifications = [];
+    
+    // 1. Check if usage is >= 90%
+    const usageResult = await db.query(
+      `SELECT u.current_events, COALESCE(p.event_limit, u.event_limit) AS event_limit
+         FROM users u LEFT JOIN plans p ON p.id = u.plan_id WHERE u.id = $1`, [req.user.id]);
+    
+    if (usageResult.rows.length > 0) {
+      const u = usageResult.rows[0];
+      const limit = u.event_limit || 10000;
+      const usage = u.current_events || 0;
+      if (limit > 0 && (usage / limit) >= 0.9) {
+        notifications.push({
+          id: 'n_usage',
+          type: 'warning',
+          title: 'High Usage Alert',
+          message: `You have used ${Math.round((usage/limit)*100)}% of your monthly event limit. Upgrade to avoid interruption.`,
+          date: new Date().toISOString()
+        });
+      }
+    }
+
+    // 2. Check for containers in error state
+    const containerResult = await db.query(`SELECT id, name FROM containers WHERE user_id = $1 AND status = 'error'`, [req.user.id]);
+    containerResult.rows.forEach(c => {
+      notifications.push({
+        id: `n_cont_${c.id}`,
+        type: 'error',
+        title: 'Container Error',
+        message: `Container "${c.name}" is currently in an error state. Please check its configuration.`,
+        date: new Date().toISOString()
+      });
+    });
+
+    res.json({ notifications });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching notifications' });
+  }
+});
+
 // GET /api/user/usage/history - daily (this month), monthly (last 6 months) and per-container breakdown
 router.get('/usage/history', authenticate, async (req, res) => {
   try {
