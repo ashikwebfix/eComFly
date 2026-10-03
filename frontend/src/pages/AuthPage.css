@@ -26,7 +26,7 @@
 .auth-orb-1 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, #6366f1, transparent);
+  background: var(--gradient-hero-orb-1, radial-gradient(circle, #6366f1, transparent));
   top: -100px;
   right: -100px;
   animation: float 8s ease-in-out infinite;
@@ -35,7 +35,7 @@
 .auth-orb-2 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, #06b6d4, transparent);
+  background: var(--gradient-hero-orb-2, radial-gradient(circle, #06b6d4, transparent));
   bottom: -80px;
   left: -80px;
   animation: float 10s ease-in-out infinite reverse;
@@ -45,8 +45,8 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+    linear-gradient(var(--grid-color, rgba(99,102,241,0.04)) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color, rgba(99,102,241,0.04)) 1px, transparent 1px);
   background-size: 50px 50px;
   mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
 }
