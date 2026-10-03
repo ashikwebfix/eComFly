@@ -235,69 +235,79 @@ export default function HomePage() {
           <div className="hero-grid" />
         </div>
 
-        <div className="hero-split-container">
-          {/* Left Column: Text */}
-          <div className="hero-text-col">
-            <div className="hero-badge">
-              <RiSpeedLine />
-              <span>Server-Side Tracking Made Simple</span>
-            </div>
-
-            <h1 className="hero-title">
-              Deploy sGTM Containers <br />
-              <span className="gradient-text">in Under 60 Seconds</span>
-            </h1>
-
-            <p className="hero-subtitle">
-              eComFly gives your ecommerce business enterprise-grade server-side tracking infrastructure.
-              Bypass ad blockers, improve conversion data, and scale your analytics — all without any DevOps hassle.
-            </p>
-
-            <div className="hero-actions">
-              <Link to="/register" className="btn btn-primary btn-xl">
-                Start for Free <FiArrowRight />
-              </Link>
-              <a href="#pricing" className="btn btn-secondary btn-xl">
-                View Pricing
-              </a>
-            </div>
-
-            <p className="hero-note">✓ Free plan available · ✓ No credit card required · ✓ Deploy in 60 seconds</p>
+        <div className="hero-content">
+          <div className="hero-badge">
+            <RiSpeedLine />
+            <span>Server-Side Tracking Made Simple</span>
           </div>
 
-          {/* Right Column: Interactive Data Flow Visual */}
-          <div className="hero-visual-col">
-            <div className="data-flow-visual">
-              {/* Nodes */}
-              <div className="node node-browser">
-                <FiGlobe />
-                <span>Store</span>
-              </div>
-              <div className="node node-server">
-                <FiServer />
-                <span>eComFly sGTM</span>
-                <div className="server-pulse"></div>
-              </div>
-              <div className="node node-meta">
-                <FiActivity />
-                <span>FB CAPI</span>
-              </div>
-              <div className="node node-ga4">
-                <FiBarChart2 />
-                <span>GA4</span>
-              </div>
+          <h1 className="hero-title">
+            Deploy sGTM Containers <br />
+            <span className="gradient-text">in Under 60 Seconds</span>
+          </h1>
 
-              {/* Connecting Lines */}
-              <svg className="flow-lines" preserveAspectRatio="none" viewBox="0 0 400 400">
-                <path className="line-path" d="M 50 200 L 200 200" />
-                <path className="line-path" d="M 200 200 C 250 200 300 100 350 100" />
-                <path className="line-path" d="M 200 200 C 250 200 300 300 350 300" />
-                
-                {/* Data Packets (Animated) */}
-                <circle className="packet packet-1" cx="0" cy="0" r="4" />
-                <circle className="packet packet-2" cx="0" cy="0" r="4" />
-                <circle className="packet packet-3" cx="0" cy="0" r="4" />
-              </svg>
+          <p className="hero-subtitle">
+            eComFly gives your ecommerce business enterprise-grade server-side tracking infrastructure.
+            Bypass ad blockers, improve conversion data, and scale your analytics — all without any DevOps hassle.
+          </p>
+
+          <div className="hero-actions">
+            <Link to="/register" className="btn btn-primary btn-xl">
+              Start for Free <FiArrowRight />
+            </Link>
+            <a href="#pricing" className="btn btn-secondary btn-xl">
+              View Pricing
+            </a>
+          </div>
+
+          <p className="hero-note">✓ Free plan available · ✓ No credit card required · ✓ Deploy in 60 seconds</p>
+        </div>
+
+        {/* 3D Hero Visual Element */}
+        <div className="hero-visual-wrapper">
+          <div className="floating-badge badge-1">
+            <FiLayers /> Server-Side
+          </div>
+          <div className="floating-badge badge-2">
+            <RiCodeSSlashLine /> GTM Ready
+          </div>
+          <div className="floating-badge badge-3">
+            <FiActivity /> 99.9% Uptime
+          </div>
+          
+          <div className="hero-dashboard-mockup">
+            <div className="mockup-header">
+              <div className="mockup-dots">
+                <span className="dot dot-red"></span>
+                <span className="dot dot-yellow"></span>
+                <span className="dot dot-green"></span>
+              </div>
+              <div className="mockup-url">app.ecomfly.com/deploy</div>
+            </div>
+            <div className="mockup-body">
+              <div className="mockup-sidebar">
+                <div className="mockup-line w-full"></div>
+                <div className="mockup-line w-3/4"></div>
+                <div className="mockup-line w-1/2"></div>
+                <div className="mockup-line w-full mt-auto"></div>
+              </div>
+              <div className="mockup-content">
+                <div className="mockup-card">
+                  <div className="mockup-card-title"></div>
+                  <div className="mockup-chart">
+                    <div className="mockup-bar" style={{height: '40%'}}></div>
+                    <div className="mockup-bar" style={{height: '65%'}}></div>
+                    <div className="mockup-bar" style={{height: '45%'}}></div>
+                    <div className="mockup-bar" style={{height: '90%'}}></div>
+                    <div className="mockup-bar" style={{height: '75%'}}></div>
+                    <div className="mockup-bar" style={{height: '100%'}}></div>
+                  </div>
+                </div>
+                <div className="mockup-card-small-group">
+                  <div className="mockup-card-small"></div>
+                  <div className="mockup-card-small"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
