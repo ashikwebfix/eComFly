@@ -19,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const user = await login(form.email, form.password);
-      toast.success(`Welcome back, ${user.name}!`);
+      toast.success(`Welcome back, ${user.name}!`, { duration: 700 });
       navigate(user.role === 'admin' ? '/admin' : '/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Invalid credentials');

@@ -39,7 +39,7 @@ export default function DashboardLayout() {
 
   const handleLogout = () => {
     logout();
-    toast.success('Logged out successfully');
+    toast.success('Logged out successfully', { duration: 700 });
     navigate('/');
   };
 
@@ -122,14 +122,15 @@ export default function DashboardLayout() {
             {/* Notifications */}
             <div 
               className="notif-wrapper" 
-              style={{ position: 'relative' }}
+              style={{ position: 'relative', paddingBottom: '12px', marginBottom: '-12px' }}
               onMouseEnter={() => setNotifOpen(true)}
               onMouseLeave={() => setNotifOpen(false)}
             >
               <button 
                 className="header-icon-btn" 
                 aria-label="Notifications"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   setNotifOpen(!notifOpen);
                   setUserMenuOpen(false);
                 }}
@@ -139,7 +140,7 @@ export default function DashboardLayout() {
               </button>
 
               {notifOpen && (
-                <div className="user-dropdown" style={{ minWidth: '320px', right: '-10px', top: 'calc(100% + 12px)' }}>
+                <div className="user-dropdown" style={{ minWidth: '320px', right: '-10px', top: '100%' }}>
                   <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: '600', fontSize: '0.9rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>Notifications</span>
                     {notifications.length > 0 && (
