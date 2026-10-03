@@ -273,6 +273,52 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* CRO Section */}
+      <section id="cro" className="section cro-section">
+        <div className="section-inner">
+          <div className="cro-container">
+            <div className="cro-content">
+              <span className="section-tag tag-amber">Conversion Optimization</span>
+              <h2 className="section-title">Recover <span className="gradient-text-amber">20-30%</span> of Lost Data</h2>
+              <p className="cro-desc">
+                Ad blockers and ITP (Intelligent Tracking Prevention) are silently killing your ROAS. By moving your tracking server-side, you feed Facebook CAPI and Google Ads the pristine, first-party data they need to optimize campaigns.
+              </p>
+              <ul className="cro-list">
+                <li><FiCheck className="icon-green" /> Decrease Cost Per Acquisition (CPA)</li>
+                <li><FiCheck className="icon-green" /> Boost Return on Ad Spend (ROAS)</li>
+                <li><FiCheck className="icon-green" /> Feed 100% accurate data to algorithms</li>
+                <li><FiCheck className="icon-green" /> Completely immune to browser ad-blockers</li>
+              </ul>
+            </div>
+            <div className="cro-visual">
+              <div className="cro-card">
+                <div className="cro-card-header">
+                  <div>
+                    <h4 className="cro-card-title">Campaign ROAS</h4>
+                    <p className="cro-card-subtitle">Last 30 Days vs Previous</p>
+                  </div>
+                  <div className="cro-badge">+ 34.2%</div>
+                </div>
+                <div className="cro-chart">
+                  <div className="cro-bar-group">
+                    <div className="cro-bar cro-bar-old">
+                      <div className="cro-bar-fill" style={{ height: '45%' }}></div>
+                    </div>
+                    <span className="cro-label">Browser<br/>Only</span>
+                  </div>
+                  <div className="cro-bar-group">
+                    <div className="cro-bar cro-bar-new">
+                      <div className="cro-bar-fill" style={{ height: '95%' }}></div>
+                    </div>
+                    <span className="cro-label">Server-Side<br/>(eComFly)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="section">
         <div className="section-inner">
