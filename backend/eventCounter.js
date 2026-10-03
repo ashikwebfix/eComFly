@@ -20,7 +20,12 @@ let state = { offset: null, inode: null, day: null };
 let running = false;
 let leftover = '';
 
-const today = () => new Date().toISOString().slice(0, 10);
+// Local (server timezone) date as YYYY-MM-DD
+const today = () => {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+};
 
 const loadState = () => {
   try { state = { ...state, ...JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) }; } catch (e) { /* first run */ }
@@ -58,6 +63,10 @@ const tick = async () => {
     // Reset daily counters on date change.
     if (state.day !== today()) {
       await db.query('UPDATE containers SET events_today = 0');
+      // New month: reset monthly usage for everyone
+      if (state.day && state.day.slice(0, 7) !== today().slice(0, 7)) {
+        await db.query('UPDATE users SET current_events = 0');
+      }
       state.day = today(); saveState();
     }
 
@@ -88,9 +97,13 @@ const tick = async () => {
             SET events_count = COALESCE(events_count,0) + $1,
                 events_today = COALESCE(events_today,0) + $1
           WHERE lower(auto_domain) = $2 OR lower(custom_domain) = $2
-          RETURNING user_id`, [n, host]);
+          RETURNING id, user_id`, [n, host]);
       if (r.rows.length > 0 && r.rows[0].user_id) {
         await db.query('UPDATE users SET current_events = COALESCE(current_events,0) + $1 WHERE id = $2', [n, r.rows[0].user_id]);
+        await db.query(
+          `INSERT INTO event_logs (user_id, container_id, event_count, date) VALUES ($1, $2, $3, $4)
+           ON CONFLICT (container_id, date) DO UPDATE SET event_count = event_logs.event_count + EXCLUDED.event_count`,
+          [r.rows[0].user_id, r.rows[0].id, n, today()]);
       }
     }
 

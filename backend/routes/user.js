@@ -85,4 +85,37 @@ router.get('/usage', authenticate, async (req, res) => {
   }
 });
 
+// GET /api/user/usage/history - daily (this month), monthly (last 6 months) and per-container breakdown
+router.get('/usage/history', authenticate, async (req, res) => {
+  try {
+    const daily = await db.query(
+      `SELECT to_char(date, 'YYYY-MM-DD') AS date, SUM(event_count)::int AS events
+         FROM event_logs
+        WHERE user_id = $1 AND date >= date_trunc('month', CURRENT_DATE)::date
+        GROUP BY date ORDER BY date`, [req.user.id]);
+    const monthly = await db.query(
+      `SELECT to_char(date_trunc('month', date), 'YYYY-MM') AS month, SUM(event_count)::int AS events
+         FROM event_logs
+        WHERE user_id = $1 AND date >= (date_trunc('month', CURRENT_DATE) - interval '5 months')::date
+        GROUP BY 1 ORDER BY 1`, [req.user.id]);
+    const containers = await db.query(
+      `SELECT c.id, c.name, COALESCE(c.events_count,0) AS total, COALESCE(c.events_today,0) AS today,
+              COALESCE((SELECT SUM(event_count) FROM event_logs e
+                         WHERE e.container_id = c.id AND e.date >= date_trunc('month', CURRENT_DATE)::date),0)::int AS this_month
+         FROM containers c WHERE c.user_id = $1 ORDER BY c.created_at`, [req.user.id]);
+    const today = await db.query(
+      `SELECT COALESCE(SUM(events_today),0)::int AS today FROM containers WHERE user_id = $1`, [req.user.id]);
+
+    res.json({
+      daily: daily.rows,
+      monthly: monthly.rows,
+      containers: containers.rows,
+      today: today.rows[0].today,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching usage history' });
+  }
+});
+
 module.exports = router;

@@ -98,6 +98,7 @@ CREATE INDEX IF NOT EXISTS idx_containers_user_id ON containers(user_id);
 CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
 CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
 CREATE INDEX IF NOT EXISTS idx_event_logs_user_date ON event_logs(user_id, date);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_event_logs_container_date ON event_logs(container_id, date);
 CREATE INDEX IF NOT EXISTS idx_custom_domains_user_id ON custom_domains(user_id);
 
 -- Seed default plans
