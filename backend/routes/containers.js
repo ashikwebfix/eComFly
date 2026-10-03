@@ -90,13 +90,31 @@ router.get('/:id', authenticate, async (req, res) => {
 router.put('/:id', authenticate, async (req, res) => {
   try {
     const { name, container_config, notes } = req.body;
+    
+    // Get old container first to check if config changed
+    const oldContainerResult = await db.query('SELECT * FROM containers WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+    if (oldContainerResult.rows.length === 0) return res.status(404).json({ message: 'Container not found' });
+    const oldContainer = oldContainerResult.rows[0];
+
     const result = await db.query(
       `UPDATE containers SET name = COALESCE($1, name), container_config = COALESCE($2, container_config), notes = COALESCE($3, notes), updated_at = NOW() 
        WHERE id = $4 AND user_id = $5 RETURNING *`,
       [name, container_config, notes, req.params.id, req.user.id]
     );
-    if (result.rows.length === 0) return res.status(404).json({ message: 'Container not found' });
-    res.json({ container: result.rows[0] });
+    const container = result.rows[0];
+
+    // Redeploy if container_config was provided and it changed
+    if (container_config && oldContainer.container_config !== container_config) {
+      (async () => {
+        try {
+          await execPromise(`/root/deploy_sgtm.sh update ${container.id} ${container.auto_domain} '${container_config.trim()}' ${container.container_port}`);
+        } catch (e) {
+          console.error('Docker update failed:', e);
+        }
+      })();
+    }
+
+    res.json({ container });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error updating container' });

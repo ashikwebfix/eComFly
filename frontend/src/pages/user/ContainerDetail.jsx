@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiArrowLeft, FiCopy, FiExternalLink, FiServer, FiGlobe, FiZap, FiRefreshCw } from 'react-icons/fi';
+import { FiArrowLeft, FiCopy, FiExternalLink, FiServer, FiGlobe, FiZap, FiRefreshCw, FiEdit2, FiX } from 'react-icons/fi';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
 import api from '../../utils/api';
@@ -14,6 +14,9 @@ export default function ContainerDetail() {
   const { id } = useParams();
   const [container, setContainer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', container_config: '', notes: '' });
 
   useEffect(() => {
     fetchContainer();
@@ -33,6 +36,33 @@ export default function ContainerDetail() {
   const copy = (text, label) => {
     navigator.clipboard.writeText(text);
     toast.success(`${label} copied!`);
+  };
+
+  const openEditModal = () => {
+    setEditForm({
+      name: container.name || '',
+      container_config: container.container_config || '',
+      notes: container.notes || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    if (!editForm.name.trim() || !editForm.container_config.trim()) {
+      return toast.error('Name and Config string are required');
+    }
+    setSaving(true);
+    try {
+      const res = await api.put(`/containers/${id}`, editForm);
+      setContainer(res.data.container);
+      toast.success('Container updated successfully!');
+      setShowEditModal(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error updating container');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center p-xl"><div className="spinner spinner-lg"></div></div>;
@@ -61,9 +91,14 @@ export default function ContainerDetail() {
               </div>
             </div>
           </div>
-          <button className="btn btn-secondary" onClick={() => toast.success('Container restarted')}>
-            <FiRefreshCw /> Restart
-          </button>
+          <div style={{display:'flex', gap:'0.5rem'}}>
+            <button className="btn btn-secondary" onClick={openEditModal}>
+              <FiEdit2 /> Edit
+            </button>
+            <button className="btn btn-secondary" onClick={() => toast.success('Container restarted')}>
+              <FiRefreshCw /> Restart
+            </button>
+          </div>
         </div>
       </div>
 
@@ -181,6 +216,44 @@ export default function ContainerDetail() {
       </div>
 
       <style>{`.icon-copy-btn{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;border-radius:4px;font-size:0.85rem;transition:color 0.15s;display:flex;align-items:center;}.icon-copy-btn:hover{color:var(--primary-light);}`}</style>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowEditModal(false)}>
+          <div className="modal">
+            <div className="modal-header">
+              <h2 className="modal-title">Edit Container</h2>
+              <button className="modal-close" onClick={() => setShowEditModal(false)}><FiX /></button>
+            </div>
+            <form onSubmit={handleUpdate}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Container Name *</label>
+                  <input type="text" className="form-input" 
+                    value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Container Configuration String *</label>
+                  <input type="text" className="form-input"
+                    value={editForm.container_config} onChange={e => setEditForm({...editForm, container_config: e.target.value})} required />
+                  <p className="form-hint">Updating this string will restart the underlying server with the new config.</p>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Notes</label>
+                  <textarea className="form-textarea"
+                    value={editForm.notes} onChange={e => setEditForm({...editForm, notes: e.target.value})} rows={3} />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowEditModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={saving}>
+                  {saving ? <><div className="spinner"/><span>Saving...</span></> : <span>Save Changes</span>}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
