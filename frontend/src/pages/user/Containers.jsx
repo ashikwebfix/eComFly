@@ -221,7 +221,7 @@ export default function UserContainers() {
                 <div className="alert alert-info mb-lg" style={{marginBottom:'1.25rem'}}>
                   <FiAlertCircle />
                   <div style={{fontSize:'0.82rem'}}>
-                    An auto-generated domain (e.g., <code>abc123.ecomfly.ecomfixr.com</code>) will be assigned instantly.
+                    An auto-generated domain (e.g., <code>abc123.bookingfixr.com</code>) will be assigned instantly.
                     You can add your own domain from the Domains section.
                   </div>
                 </div>

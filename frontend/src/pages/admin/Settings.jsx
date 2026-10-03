@@ -5,8 +5,8 @@ import { FiSave, FiSettings, FiGlobe, FiMail, FiShield } from 'react-icons/fi';
 export default function AdminSettings() {
   const [general, setGeneral] = useState({
     site_name: 'eComFly',
-    site_url: 'https://ecomfly.ecomfixr.com',
-    support_email: 'support@ecomfly.ecomfixr.com',
+    site_url: 'https://bookingfixr.com',
+    support_email: 'support@bookingfixr.com',
     server_ip: '45.134.211.80',
     max_free_events: 10000,
     default_region: 'Singapore',

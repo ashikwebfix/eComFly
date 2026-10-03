@@ -6,7 +6,7 @@ const router = express.Router();
 const generateDomain = (name) => {
   const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').slice(0, 20);
   const rand = Math.random().toString(36).substr(2, 6);
-  return `${slug}-${rand}.ecomfly.ecomfixr.com`;
+  return `${slug}-${rand}.bookingfixr.com`;
 };
 
 const util = require('util');

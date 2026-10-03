@@ -143,7 +143,7 @@ certbot --nginx -d yourdomain.com -d www.yourdomain.com
 ---
 
 ## 🎉 You're Live!
-Your platform should now be accessible at `https://ecomfly.ecomfixr.com`.
+Your platform should now be accessible at `https://bookingfixr.com`.
 
 **Default Login Credentials:**
 - **Admin:** `admin@ecomfly.com` / `admin123`

@@ -3,11 +3,11 @@ import toast from 'react-hot-toast';
 import { FiServer, FiSearch, FiRefreshCw, FiStopCircle, FiPlay, FiExternalLink } from 'react-icons/fi';
 
 const ALL_CONTAINERS = [
-  { id:'c1', name:'Main Store Tracking', user:'Ahmed Hassan', email:'ahmed@store.com', status:'running', auto_domain:'main-abc123.ecomfly.ecomfixr.com', custom_domain:'track.mystore.com', events:32400, created:'2024-10-01', region:'SGP' },
-  { id:'c2', name:'Marketing Tracking', user:'Ahmed Hassan', email:'ahmed@store.com', status:'running', auto_domain:'mktg-xyz789.ecomfly.ecomfixr.com', custom_domain:null, events:12400, created:'2024-10-10', region:'SGP' },
-  { id:'c3', name:'Pro Analytics', user:'Rahim Uddin', email:'rahim@shop.com', status:'running', auto_domain:'pro-def456.ecomfly.ecomfixr.com', custom_domain:'data.shoprahim.com', events:89200, created:'2024-09-15', region:'SGP' },
-  { id:'c4', name:'Dev Container', user:'Sara Islam', email:'sara@brand.com', status:'stopped', auto_domain:'dev-ghi789.ecomfly.ecomfixr.com', custom_domain:null, events:4200, created:'2024-10-27', region:'SGP' },
-  { id:'c5', name:'Error Test', user:'Nadia Rahman', email:'nadia@fashion.com', status:'error', auto_domain:'err-jkl012.ecomfly.ecomfixr.com', custom_domain:null, events:0, created:'2024-10-22', region:'SGP' },
+  { id:'c1', name:'Main Store Tracking', user:'Ahmed Hassan', email:'ahmed@store.com', status:'running', auto_domain:'main-abc123.bookingfixr.com', custom_domain:'track.mystore.com', events:32400, created:'2024-10-01', region:'SGP' },
+  { id:'c2', name:'Marketing Tracking', user:'Ahmed Hassan', email:'ahmed@store.com', status:'running', auto_domain:'mktg-xyz789.bookingfixr.com', custom_domain:null, events:12400, created:'2024-10-10', region:'SGP' },
+  { id:'c3', name:'Pro Analytics', user:'Rahim Uddin', email:'rahim@shop.com', status:'running', auto_domain:'pro-def456.bookingfixr.com', custom_domain:'data.shoprahim.com', events:89200, created:'2024-09-15', region:'SGP' },
+  { id:'c4', name:'Dev Container', user:'Sara Islam', email:'sara@brand.com', status:'stopped', auto_domain:'dev-ghi789.bookingfixr.com', custom_domain:null, events:4200, created:'2024-10-27', region:'SGP' },
+  { id:'c5', name:'Error Test', user:'Nadia Rahman', email:'nadia@fashion.com', status:'error', auto_domain:'err-jkl012.bookingfixr.com', custom_domain:null, events:0, created:'2024-10-22', region:'SGP' },
 ];
 
 export default function AdminContainers() {
