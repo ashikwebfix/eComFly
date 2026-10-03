@@ -14,9 +14,9 @@
 }
 
 .navbar-scrolled {
-  background: rgba(6, 11, 20, 0.9);
+  background: var(--bg-overlay);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid var(--border);
   padding: 0.875rem 2rem;
 }
 
@@ -245,8 +245,8 @@
   align-items: center;
   gap: 0;
   margin-top: 4rem;
-  background: rgba(12, 20, 37, 0.8);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   backdrop-filter: blur(20px);
   overflow: hidden;
@@ -260,7 +260,7 @@
   gap: 0.25rem;
   padding: 1.5rem 2.5rem;
   flex: 1;
-  border-right: 1px solid rgba(255,255,255,0.06);
+  border-right: 1px solid var(--border);
 }
 
 .stat-item:last-child {
@@ -874,8 +874,8 @@
   .hero { padding: 6rem 1.5rem 3rem; }
   .hero-title { font-size: 2.2rem; }
   .stats-bar { flex-wrap: wrap; }
-  .stat-item { flex: 0 0 50%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .stat-item:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.06); }
+  .stat-item { flex: 0 0 50%; border-right: none; border-bottom: 1px solid var(--border); }
+  .stat-item:nth-child(odd) { border-right: 1px solid var(--border); }
   .features-grid { grid-template-columns: 1fr; }
   .pricing-grid { grid-template-columns: 1fr; }
   .footer-inner { flex-direction: column; gap: 2rem; }
