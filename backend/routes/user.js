@@ -66,7 +66,9 @@ router.put('/password', authenticate, async (req, res) => {
 // GET /api/user/usage
 router.get('/usage', authenticate, async (req, res) => {
   try {
-    const result = await db.query('SELECT current_events, event_limit FROM users WHERE id = $1', [req.user.id]);
+    const result = await db.query(
+      `SELECT u.current_events, COALESCE(p.event_limit, u.event_limit) AS event_limit
+         FROM users u LEFT JOIN plans p ON p.id = u.plan_id WHERE u.id = $1`, [req.user.id]);
     if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
     
     const user = result.rows[0];

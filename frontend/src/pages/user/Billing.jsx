@@ -92,12 +92,16 @@ export default function UserBilling() {
         </div>
         <div className="stat-card cyan">
           <div className="stat-icon cyan"><FiDollarSign /></div>
-          <div className="stat-value">৳{user?.plan_price || '0'}</div>
+          <div className="stat-value">৳{Number(user?.plan_price || 0).toLocaleString()}</div>
           <div className="stat-label">Monthly Cost</div>
         </div>
         <div className="stat-card green">
           <div className="stat-icon green"><FiCalendar /></div>
-          <div className="stat-value">{user?.next_billing || 'Nov 1'}</div>
+          <div className="stat-value">
+            {user?.next_billing_date
+              ? new Date(user.next_billing_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+              : '—'}
+          </div>
           <div className="stat-label">Next Billing Date</div>
         </div>
       </div>
@@ -119,7 +123,7 @@ export default function UserBilling() {
           ) : (
             <div className="grid grid-3 gap-lg">
               {plans.map(plan => {
-                const isCurrentPlan = (user?.plan_name || 'Free') === plan.name;
+                const isCurrentPlan = user?.plan_id ? user.plan_id === plan.id : (user?.plan_name || 'Free') === plan.name;
                 const badgeText = plan.is_featured ? 'Popular' : null;
                 return (
                   <div key={plan.id} className={`card ${plan.is_featured ? 'featured-plan' : ''}`}
@@ -329,7 +333,7 @@ export default function UserBilling() {
 
       <style>{`
         .featured-plan { border-color: rgba(99,102,241,0.4) !important; box-shadow: 0 0 30px rgba(99,102,241,0.1); }
-        .plan-top-badge { position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#6366f1,#818cf8);color:white;padding:0.25rem 0.875rem;border-radius:999px;font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em; }
+        .plan-top-badge { position:absolute;top:14px;right:14px;z-index:2;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;box-shadow:0 2px 10px rgba(99,102,241,0.45); }
         .current-plan-badge { display:flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;color:var(--success-light);margin-bottom:0.5rem; }
       `}</style>
     </div>

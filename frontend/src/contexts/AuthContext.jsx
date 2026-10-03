@@ -50,13 +50,33 @@ export function AuthProvider({ children }) {
   };
 
   const updateUser = (updates) => {
-    const updated = { ...user, ...updates };
-    setUser(updated);
-    localStorage.setItem('ecf_user', JSON.stringify(updated));
+    setUser(prev => {
+      const updated = { ...prev, ...updates };
+      localStorage.setItem('ecf_user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
+  // Pull the latest profile, plan limits and usage from the server
+  const refreshUser = async () => {
+    try {
+      const res = await api.get('/auth/me');
+      updateUser(res.data.user);
+    } catch {
+      // ignore - the 401 interceptor handles expired sessions
+    }
+  };
+
+  const userId = user?.id;
+  useEffect(() => {
+    if (!userId) return;
+    refreshUser();
+    const timer = setInterval(refreshUser, 20000);
+    return () => clearInterval(timer);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

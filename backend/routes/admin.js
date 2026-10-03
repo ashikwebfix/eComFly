@@ -51,9 +51,22 @@ router.put('/users/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { status, plan_name, event_limit } = req.body;
     
+    // If the plan is changed, link the real plan so name/price/limits stay in sync
+    let planId = null, planPrice = null, limit = event_limit !== undefined ? parseInt(event_limit) : null;
+    if (plan_name) {
+      const p = await db.query('SELECT id, price, event_limit FROM plans WHERE name = $1', [plan_name]);
+      if (p.rows.length > 0) {
+        planId = p.rows[0].id;
+        planPrice = p.rows[0].price;
+        if (event_limit === undefined) limit = p.rows[0].event_limit;
+      }
+    }
+
     const result = await db.query(
-      `UPDATE users SET status = COALESCE($1, status), plan_name = COALESCE($2, plan_name), event_limit = COALESCE($3, event_limit) WHERE id = $4 RETURNING id, name, email, role, status, plan_name, plan_price, event_limit, current_events, created_at`,
-      [status, plan_name, event_limit !== undefined ? parseInt(event_limit) : null, req.params.id]
+      `UPDATE users SET status = COALESCE($1, status), plan_name = COALESCE($2, plan_name), event_limit = COALESCE($3, event_limit),
+              plan_id = COALESCE($5, plan_id), plan_price = COALESCE($6, plan_price)
+        WHERE id = $4 RETURNING id, name, email, role, status, plan_name, plan_price, event_limit, current_events, created_at`,
+      [status, plan_name, limit, req.params.id, planId, planPrice]
     );
 
     if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });

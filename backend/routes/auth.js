@@ -90,10 +90,27 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// GET /api/auth/me
-router.get('/me', authenticate, (req, res) => {
-  const { password: _, ...safeUser } = req.user;
-  res.json({ user: safeUser });
+// GET /api/auth/me - fresh user row plus the live limits of the assigned plan
+router.get('/me', authenticate, async (req, res) => {
+  try {
+    const { password: _, ...safeUser } = req.user;
+    if (req.user.plan_id) {
+      const p = await db.query('SELECT name, price, event_limit, container_limit, domain_limit FROM plans WHERE id = $1', [req.user.plan_id]);
+      if (p.rows.length > 0) {
+        const plan = p.rows[0];
+        // The plan is the source of truth for name, price and limits
+        safeUser.plan_name = plan.name;
+        safeUser.plan_price = plan.price;
+        safeUser.event_limit = plan.event_limit;
+        safeUser.container_limit = plan.container_limit;
+        safeUser.domain_limit = plan.domain_limit;
+      }
+    }
+    res.json({ user: safeUser });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching profile' });
+  }
 });
 
 module.exports = router;

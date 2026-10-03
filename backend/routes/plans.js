@@ -74,7 +74,14 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
     );
     
     if (result.rows.length === 0) return res.status(404).json({ message: 'Plan not found' });
-    res.json({ plan: result.rows[0], message: 'Plan updated' });
+
+    // Keep every subscriber in sync with the edited plan (name, price, event limit)
+    const plan = result.rows[0];
+    await db.query(
+      'UPDATE users SET plan_name = $1, plan_price = $2, event_limit = $3 WHERE plan_id = $4',
+      [plan.name, plan.price, plan.event_limit, plan.id]
+    );
+    res.json({ plan, message: 'Plan updated' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error updating plan' });
