@@ -120,7 +120,12 @@ export default function DashboardLayout() {
             </div>
 
             {/* Notifications */}
-            <div className="notif-wrapper" style={{ position: 'relative' }}>
+            <div 
+              className="notif-wrapper" 
+              style={{ position: 'relative' }}
+              onMouseEnter={() => setNotifOpen(true)}
+              onMouseLeave={() => setNotifOpen(false)}
+            >
               <button 
                 className="header-icon-btn" 
                 aria-label="Notifications"

@@ -124,6 +124,32 @@ router.get('/notifications', authenticate, async (req, res) => {
       });
     });
 
+    // 3. Check for pending or recent payments
+    const paymentResult = await db.query(`SELECT id, amount, status, created_at, reviewed_at FROM payments WHERE user_id = $1 AND (status = 'pending' OR reviewed_at >= NOW() - INTERVAL '3 days') ORDER BY COALESCE(reviewed_at, created_at) DESC LIMIT 5`, [req.user.id]);
+    paymentResult.rows.forEach(p => {
+      let type, title, message;
+      if (p.status === 'pending') {
+         type = 'warning';
+         title = 'Payment Pending';
+         message = `Your payment of ৳${p.amount.toLocaleString()} is currently under review.`;
+      } else if (p.status === 'approved') {
+         type = 'success';
+         title = 'Payment Approved';
+         message = `Your payment of ৳${p.amount.toLocaleString()} has been approved!`;
+      } else if (p.status === 'rejected') {
+         type = 'error';
+         title = 'Payment Rejected';
+         message = `Your payment of ৳${p.amount.toLocaleString()} was rejected. Please contact support.`;
+      }
+      notifications.push({
+        id: `n_pay_${p.id}`,
+        type,
+        title,
+        message,
+        date: p.reviewed_at || p.created_at
+      });
+    });
+
     res.json({ notifications });
   } catch (err) {
     console.error(err);
