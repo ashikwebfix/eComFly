@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FiServer, FiZap, FiShield, FiGlobe, FiBarChart2, FiCheck,
-  FiArrowRight, FiStar, FiMail, FiTwitter, FiLinkedin, FiMenu, FiX, FiSun, FiMoon
+  FiArrowRight, FiStar, FiMail, FiTwitter, FiLinkedin, FiMenu, FiX, FiSun, FiMoon,
+  FiActivity, FiBox, FiLayers
 } from 'react-icons/fi';
-import { RiRocketLine, RiRadarLine, RiSpeedLine } from 'react-icons/ri';
+import { RiRocketLine, RiRadarLine, RiSpeedLine, RiCodeSSlashLine } from 'react-icons/ri';
 import { useTheme } from '../contexts/ThemeContext';
 import './HomePage.css';
 
@@ -260,6 +261,55 @@ export default function HomePage() {
           </div>
 
           <p className="hero-note">✓ Free plan available · ✓ No credit card required · ✓ Deploy in 60 seconds</p>
+        </div>
+
+        {/* 3D Hero Visual Element */}
+        <div className="hero-visual-wrapper">
+          <div className="floating-badge badge-1">
+            <FiLayers /> Server-Side
+          </div>
+          <div className="floating-badge badge-2">
+            <RiCodeSSlashLine /> GTM Ready
+          </div>
+          <div className="floating-badge badge-3">
+            <FiActivity /> 99.9% Uptime
+          </div>
+          
+          <div className="hero-dashboard-mockup">
+            <div className="mockup-header">
+              <div className="mockup-dots">
+                <span className="dot dot-red"></span>
+                <span className="dot dot-yellow"></span>
+                <span className="dot dot-green"></span>
+              </div>
+              <div className="mockup-url">app.ecomfly.com/deploy</div>
+            </div>
+            <div className="mockup-body">
+              <div className="mockup-sidebar">
+                <div className="mockup-line w-full"></div>
+                <div className="mockup-line w-3/4"></div>
+                <div className="mockup-line w-1/2"></div>
+                <div className="mockup-line w-full mt-auto"></div>
+              </div>
+              <div className="mockup-content">
+                <div className="mockup-card">
+                  <div className="mockup-card-title"></div>
+                  <div className="mockup-chart">
+                    <div className="mockup-bar" style={{height: '40%'}}></div>
+                    <div className="mockup-bar" style={{height: '65%'}}></div>
+                    <div className="mockup-bar" style={{height: '45%'}}></div>
+                    <div className="mockup-bar" style={{height: '90%'}}></div>
+                    <div className="mockup-bar" style={{height: '75%'}}></div>
+                    <div className="mockup-bar" style={{height: '100%'}}></div>
+                  </div>
+                </div>
+                <div className="mockup-card-small-group">
+                  <div className="mockup-card-small"></div>
+                  <div className="mockup-card-small"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Stats Bar */}
