@@ -127,7 +127,7 @@ export default function UserBilling() {
                 const badgeText = plan.is_featured ? 'Popular' : null;
                 return (
                   <div key={plan.id} className={`card ${plan.is_featured ? 'featured-plan' : ''}`}
-                    style={{border: isCurrentPlan ? '1px solid rgba(99,102,241,0.5)' : undefined, position:'relative'}}>
+                    style={{border: isCurrentPlan ? '1px solid rgba(35,80,240,0.5)' : undefined, position:'relative'}}>
                     {badgeText && (
                       <div className="plan-top-badge">{badgeText}</div>
                     )}
@@ -188,7 +188,7 @@ export default function UserBilling() {
               </div>
 
               {selectedPlan && (
-                <div style={{background:'rgba(99,102,241,0.06)',border:'1px solid rgba(99,102,241,0.2)',borderRadius:'var(--radius-md)',padding:'1rem',marginBottom:'1.5rem',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <div style={{background:'rgba(35,80,240,0.06)',border:'1px solid rgba(35,80,240,0.2)',borderRadius:'var(--radius-md)',padding:'1rem',marginBottom:'1.5rem',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                   <div>
                     <div style={{fontWeight:700,color:'var(--text-primary)'}}>{selectedPlan.name} Plan</div>
                     <div style={{fontSize:'0.82rem',color:'var(--text-secondary)'}}>
@@ -211,7 +211,7 @@ export default function UserBilling() {
                       style={{
                         flex:1, padding:'0.875rem', borderRadius:'var(--radius-md)', cursor:'pointer',
                         border: paymentMethod === m ? '2px solid var(--primary)' : '1px solid var(--border)',
-                        background: paymentMethod === m ? 'rgba(99,102,241,0.1)' : 'transparent',
+                        background: paymentMethod === m ? 'rgba(35,80,240,0.1)' : 'transparent',
                         color: paymentMethod === m ? 'var(--primary-light)' : 'var(--text-secondary)',
                         fontWeight: paymentMethod === m ? 700 : 500, fontFamily:'var(--font-sans)', fontSize:'0.875rem',
                         transition:'all 0.2s ease'
@@ -332,8 +332,8 @@ export default function UserBilling() {
       )}
 
       <style>{`
-        .featured-plan { border-color: rgba(99,102,241,0.4) !important; box-shadow: 0 0 30px rgba(99,102,241,0.1); }
-        .plan-top-badge { position:absolute;top:14px;right:14px;z-index:2;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;box-shadow:0 2px 10px rgba(99,102,241,0.45); }
+        .featured-plan { border-color: rgba(35,80,240,0.4) !important; box-shadow: 0 0 30px rgba(35,80,240,0.1); }
+        .plan-top-badge { position:absolute;top:14px;right:14px;z-index:2;background:linear-gradient(135deg,#2350f0,#5b7cf5);color:#fff;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;box-shadow:0 2px 10px rgba(35,80,240,0.45); }
         .current-plan-badge { display:flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;color:var(--success-light);margin-bottom:0.5rem; }
       `}</style>
     </div>

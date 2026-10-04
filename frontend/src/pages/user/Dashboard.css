@@ -142,7 +142,7 @@
   flex-shrink: 0;
 }
 
-.quick-action-icon.indigo { background: rgba(99,102,241,0.15); color: var(--primary-light); }
+.quick-action-icon.indigo { background: rgba(35,80,240,0.15); color: var(--primary-light); }
 .quick-action-icon.cyan { background: rgba(6,182,212,0.15); color: var(--accent-light); }
 .quick-action-icon.amber { background: rgba(245,158,11,0.15); color: var(--warning-light); }
 .quick-action-icon.green { background: rgba(16,185,129,0.15); color: var(--success-light); }

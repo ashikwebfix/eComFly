@@ -81,7 +81,7 @@ export default function AdminContainers() {
                 <tr key={c.id}>
                   <td>
                     <div style={{display:'flex',alignItems:'center',gap:'0.625rem'}}>
-                      <div style={{width:30,height:30,background:'rgba(99,102,241,0.15)',border:'1px solid rgba(99,102,241,0.2)',borderRadius:'var(--radius-sm)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.8rem',color:'var(--primary-light)',flexShrink:0}}>
+                      <div style={{width:30,height:30,background:'rgba(35,80,240,0.15)',border:'1px solid rgba(35,80,240,0.2)',borderRadius:'var(--radius-sm)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.8rem',color:'var(--primary-light)',flexShrink:0}}>
                         <FiServer />
                       </div>
                       <span style={{fontWeight:600,color:'var(--text-primary)',fontSize:'0.875rem'}}>{c.name}</span>

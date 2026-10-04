@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
-import { RiRadarLine } from 'react-icons/ri';
+import Logo from '../components/Logo';
+import AuthAside from '../components/AuthAside';
 import './AuthPage.css';
 
 export default function LoginPage() {
@@ -30,18 +31,12 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
-      <div className="auth-bg">
-        <div className="auth-orb auth-orb-1" />
-        <div className="auth-orb auth-orb-2" />
-        <div className="auth-grid" />
-      </div>
-
-      <div className="auth-container">
+      <main className="auth-main">
+        <div className="auth-container">
         <div className="auth-card">
           {/* Logo */}
-          <Link to="/" className="auth-logo">
-            <div className="logo-icon"><RiRadarLine /></div>
-            <span className="logo-text">eComFly</span>
+          <Link to="/" className="auth-logo" aria-label="eComFly home">
+            <Logo />
           </Link>
 
           <div className="auth-header">
@@ -51,10 +46,11 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label className="form-label">Email Address</label>
+              <label className="form-label" htmlFor="login-email">Email address</label>
               <div className="input-wrapper">
                 <FiMail className="input-icon" />
                 <input
+                  id="login-email"
                   type="email"
                   className="form-input padded-input"
                   placeholder="you@example.com"
@@ -67,10 +63,11 @@ export default function LoginPage() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Password</label>
+              <label className="form-label" htmlFor="login-password">Password</label>
               <div className="input-wrapper">
                 <FiLock className="input-icon" />
                 <input
+                  id="login-password"
                   type={showPw ? 'text' : 'password'}
                   className="form-input padded-input padded-right"
                   placeholder="Enter your password"
@@ -98,7 +95,9 @@ export default function LoginPage() {
             <p className="text-xs text-muted">Demo: admin@ecomfly.com / admin123</p>
           </div>
         </div>
-      </div>
+        </div>
+      </main>
+      <AuthAside heading="Welcome back to cleaner data." />
     </div>
   );
 }

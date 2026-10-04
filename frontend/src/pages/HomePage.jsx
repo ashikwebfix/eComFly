@@ -1,578 +1,523 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  FiServer, FiZap, FiShield, FiGlobe, FiBarChart2, FiCheck,
-  FiArrowRight, FiStar, FiMail, FiTwitter, FiLinkedin, FiMenu, FiX, FiSun, FiMoon,
-  FiActivity, FiBox, FiLayers
+  FiArrowRight, FiCheck, FiMenu, FiX, FiMail, FiTwitter, FiLinkedin,
+  FiShield, FiGlobe, FiBarChart2, FiServer, FiZap, FiActivity, FiCopy,
+  FiCreditCard, FiSmartphone, FiRepeat, FiPlus,
 } from 'react-icons/fi';
-import { RiRocketLine, RiRadarLine, RiSpeedLine, RiCodeSSlashLine } from 'react-icons/ri';
-import { useTheme } from '../contexts/ThemeContext';
+import {
+  SiShopify, SiWoocommerce, SiGoogletagmanager, SiGoogleanalytics,
+  SiMeta, SiGoogleads, SiTiktok, SiSnapchat, SiPinterest,
+} from 'react-icons/si';
+import Logo from '../components/Logo';
+import HeroPipeline from '../components/home/HeroPipeline';
+import RoiCalculator from '../components/home/RoiCalculator';
+import Pricing from '../components/home/Pricing';
+import { useRevealOnScroll, useCountUp } from '../hooks/useMotion';
 import './HomePage.css';
 
-const PLANS = [
+const STATS = [
+  { end: 99.9, decimals: 1, suffix: '%', label: 'Uptime SLA' },
+  { end: 50, decimals: 0, suffix: 'ms', label: 'Average latency' },
+  { end: 10, decimals: 0, suffix: 'M+', label: 'Events tracked' },
+  { end: 500, decimals: 0, suffix: '+', label: 'Stores onboarded' },
+];
+
+const INTEGRATIONS = [
+  { name: 'Shopify', Icon: SiShopify },
+  { name: 'WooCommerce', Icon: SiWoocommerce },
+  { name: 'Google Tag Manager', Icon: SiGoogletagmanager },
+  { name: 'Google Analytics 4', Icon: SiGoogleanalytics },
+  { name: 'Meta', Icon: SiMeta },
+  { name: 'Google Ads', Icon: SiGoogleads },
+  { name: 'TikTok', Icon: SiTiktok },
+  { name: 'Snapchat', Icon: SiSnapchat },
+  { name: 'Pinterest', Icon: SiPinterest },
+];
+
+const PROBLEMS = [
   {
-    name: 'Free',
-    price: '0',
-    period: 'forever',
-    events: '10,000',
-    color: 'neutral',
-    badge: null,
-    features: [
-      '10,000 events / month',
-      '1 sGTM container',
-      '1 auto-generated subdomain',
-      'Basic analytics dashboard',
-      'Community support',
-      'SSL included',
-    ],
-    notIncluded: [
-      'Custom domain',
-      'Priority support',
-      'Advanced analytics',
-      'Multiple containers',
-    ]
+    title: 'Ad blockers drop your pixels',
+    desc: 'Scripts loaded from third-party domains are blocked before they fire, so purchases never reach your ad platforms.',
   },
   {
-    name: 'Starter',
-    price: '29',
-    period: 'month',
-    events: '100,000',
-    color: 'indigo',
-    badge: 'Popular',
-    features: [
-      '100,000 events / month',
-      '3 sGTM containers',
-      '3 auto-generated subdomains',
-      '1 custom domain',
-      'Advanced analytics',
-      'Email support (48h)',
-      'SSL included',
-      'Container health monitoring',
-    ],
-    notIncluded: [
-      'Priority support',
-      'Unlimited containers',
-    ]
+    title: 'Safari and Firefox cut cookies short',
+    desc: 'Intelligent Tracking Prevention expires browser-set cookies within days, breaking attribution for returning buyers.',
   },
   {
-    name: 'Pro',
-    price: '79',
-    period: 'month',
-    events: '500,000',
-    color: 'cyan',
-    badge: 'Best Value',
-    features: [
-      '500,000 events / month',
-      '10 sGTM containers',
-      '10 auto-generated subdomains',
-      '5 custom domains',
-      'Advanced analytics & reports',
-      'Priority email support (24h)',
-      'SSL included',
-      'Container health monitoring',
-      'Usage alerts & notifications',
-    ],
-    notIncluded: []
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    period: '',
-    events: 'Unlimited',
-    color: 'gold',
-    badge: 'Enterprise',
-    features: [
-      'Unlimited events',
-      'Unlimited containers',
-      'Unlimited custom domains',
-      'Dedicated infrastructure',
-      'SLA guarantee',
-      'Dedicated account manager',
-      'Custom integrations',
-      'On-premise option',
-    ],
-    notIncluded: []
+    title: 'Algorithms optimise on partial data',
+    desc: 'Meta and Google bid against the conversions they can see. Fewer signals means higher CPA and weaker lookalikes.',
   },
 ];
 
 const FEATURES = [
   {
-    icon: <RiRocketLine />,
-    color: 'indigo',
-    title: 'Instant sGTM Deployment',
-    desc: 'Deploy server-side Google Tag Manager containers in seconds. No DevOps knowledge required — we handle the infrastructure.'
+    Icon: FiZap,
+    title: 'One-click sGTM deployment',
+    desc: 'Create a server container from the dashboard. We provision, secure and scale the infrastructure for you.',
   },
   {
-    icon: <FiGlobe />,
-    color: 'cyan',
-    title: 'Auto-Generated Domains',
-    desc: 'Get a secure subdomain instantly. Or bring your own domain and point a Type A record to our IP for a seamless setup.'
+    Icon: FiGlobe,
+    title: 'First-party domains',
+    desc: 'Get an instant auto-generated subdomain, or serve tracking from your own domain with a single A record.',
   },
   {
-    icon: <FiShield />,
-    color: 'green',
-    title: 'Privacy-First Tracking',
-    desc: 'Server-side tracking bypasses ad blockers, improves data accuracy, and keeps you compliant with GDPR and CCPA.'
+    Icon: FiShield,
+    title: 'Privacy-first by design',
+    desc: 'You decide exactly what leaves your server. Built to support GDPR and CCPA consent workflows.',
   },
   {
-    icon: <FiBarChart2 />,
-    color: 'amber',
-    title: 'Real-Time Analytics',
-    desc: 'Monitor event counts, container performance, and usage trends from a beautiful, intuitive dashboard.'
+    Icon: FiBarChart2,
+    title: 'Real-time usage analytics',
+    desc: 'Track event volume, container health and usage trends per container, with alerts before you hit a limit.',
   },
   {
-    icon: <FiZap />,
-    color: 'indigo',
-    title: 'Event-Based Pricing',
-    desc: 'Pay only for what you use. Start free with 10k events and upgrade as your business grows.'
+    Icon: FiActivity,
+    title: 'Health monitoring',
+    desc: 'Every container is watched around the clock, so a silent tracking outage never costs you a campaign.',
   },
   {
-    icon: <FiServer />,
-    color: 'cyan',
-    title: 'VPS-Powered Infrastructure',
-    desc: 'Enterprise-grade servers with 99.9% uptime SLA. Isolated containers ensure your tracking is always reliable.'
+    Icon: FiServer,
+    title: 'Isolated infrastructure',
+    desc: 'Each container runs in isolation on enterprise-grade servers backed by a 99.9% uptime SLA.',
   },
 ];
 
-const STATS = [
-  { value: '99.9%', label: 'Uptime SLA' },
-  { value: '50ms', label: 'Avg Latency' },
-  { value: '10M+', label: 'Events Tracked' },
-  { value: '500+', label: 'Happy Customers' },
+const FAQS = [
+  {
+    q: 'What is server-side tracking?',
+    a: 'Server-side tracking moves your analytics and ad-platform tags from the visitor’s browser to a server you control. Because requests come from your own domain, they are not blocked by ad blockers, cookies last longer, and you control exactly which data is shared with each platform.',
+  },
+  {
+    q: 'Do I need a developer to set this up?',
+    a: 'No. eComFly handles hosting, SSL and scaling. You paste one server URL into Google Tag Manager and, if you want to use your own domain, add a single DNS record. We show you every step in the dashboard.',
+  },
+  {
+    q: 'Which platforms does it work with?',
+    a: 'Any storefront that can run Google Tag Manager, including Shopify, WooCommerce and custom builds. Events can be forwarded to GA4, Meta Conversions API, Google Ads, TikTok and any other destination supported by server-side GTM.',
+  },
+  {
+    q: 'How do I connect my own domain?',
+    a: 'Use the auto-generated subdomain instantly, or add a Type A DNS record pointing your domain to the IP address we provide. We verify the record and activate your custom domain automatically.',
+  },
+  {
+    q: 'What payment methods do you accept?',
+    a: 'Bank Transfer, bKash and Nagad. After you submit your payment details, our team verifies the payment and activates your plan, usually within a few hours.',
+  },
+  {
+    q: 'Can I upgrade or downgrade anytime?',
+    a: 'Yes. Upgrade whenever you like from the billing dashboard. Downgrades take effect at the end of your current billing cycle.',
+  },
+  {
+    q: 'What happens if I hit my event limit?',
+    a: 'We alert you at 80% and 95% of your limit. At 100% your container keeps running but events are throttled, so upgrade to continue tracking without interruption.',
+  },
+  {
+    q: 'Is the free plan really free?',
+    a: 'Yes. You get 10,000 events per month, one sGTM container and an auto-generated subdomain. No credit card required, and no time limit.',
+  },
 ];
+
+function Stat({ end, decimals, suffix, label }) {
+  const [ref, value] = useCountUp(end, { decimals });
+  return (
+    <div className="stat" ref={ref}>
+      <span className="stat-num">
+        {value.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
+        <small>{suffix}</small>
+      </span>
+      <span className="stat-lbl">{label}</span>
+    </div>
+  );
+}
 
 export default function HomePage() {
-  const [mobileMenu, setMobileMenu] = useState(false);
+  const rootRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { theme, toggleTheme } = useTheme();
-  const [activeFaq, setActiveFaq] = useState(null);
+  const [showSticky, setShowSticky] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useRevealOnScroll(rootRef);
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handler);
-    return () => window.removeEventListener('scroll', handler);
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 8);
+        setShowSticky(window.scrollY > 720);
+        ticking = false;
+      });
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const faqs = [
-    {
-      q: 'What is server-side tracking?',
-      a: 'Server-side tracking moves your analytics from the browser to a secure server. This bypasses ad blockers, improves data accuracy, and gives you full control over what data is sent — leading to better conversions and compliance.'
-    },
-    {
-      q: 'How do I connect my domain?',
-      a: 'You can use our auto-generated subdomain instantly. To use your own domain, simply add a Type A DNS record pointing to our provided IP address. The system will verify and activate it automatically.'
-    },
-    {
-      q: 'What payment methods are accepted?',
-      a: 'We accept Bank Transfer, bKash, and Nagad. After payment, our team manually verifies and activates your plan within a few hours.'
-    },
-    {
-      q: 'Can I upgrade my plan anytime?',
-      a: 'Yes! You can upgrade your plan at any time from your billing dashboard. Downgrades take effect at the end of your billing cycle.'
-    },
-    {
-      q: 'What happens when I hit my event limit?',
-      a: 'We notify you at 80% and 95% usage. When you hit 100%, your container continues running but events are throttled. Upgrade to continue tracking without interruption.'
-    },
-    {
-      q: 'Is there a free plan?',
-      a: 'Yes! Our free plan includes 10,000 events per month, 1 sGTM container, and an auto-generated subdomain — no credit card required.'
-    },
-  ];
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText('https://track.yourstore.com');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch { /* clipboard unavailable */ }
+  };
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <div className="homepage">
-      {/* Navbar */}
-      <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
-        <div className="navbar-inner">
-          <Link to="/" className="logo">
-            <div className="logo-icon">
-              <RiRadarLine />
-            </div>
-            <span className="logo-text">eComFly</span>
-          </Link>
+    <div className="home" ref={rootRef}>
+      {/* Announcement */}
+      <div className="announce">
+        <p>
+          <strong>Free plan:</strong> 10,000 events a month, no credit card.
+          <Link to="/register"> Start in 60 seconds <FiArrowRight aria-hidden="true" /></Link>
+        </p>
+      </div>
 
-          <div className="nav-links">
-            <a href="#features" className="nav-link">Features</a>
-            <a href="#pricing" className="nav-link">Pricing</a>
-            <a href="#faq" className="nav-link">FAQ</a>
-          </div>
+      {/* Navbar */}
+      <header className={`nav ${scrolled ? 'nav-scrolled' : ''}`}>
+        <div className="nav-inner">
+          <Link to="/" className="nav-logo" aria-label="eComFly home"><Logo /></Link>
+
+          <nav className="nav-links" aria-label="Primary">
+            <a href="#problem">Why server-side</a>
+            <a href="#how">How it works</a>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+          </nav>
 
           <div className="nav-actions">
-            <button 
-              className="btn btn-secondary btn-sm" 
-              style={{ padding: '0.4rem 0.6rem' }} 
-              onClick={toggleTheme}
-              aria-label="Toggle Theme"
-            >
-              {theme === 'dark' ? <FiSun /> : <FiMoon />}
-            </button>
-            <Link to="/login" className="btn btn-secondary btn-sm">Sign In</Link>
-            <Link to="/register" className="btn btn-primary btn-sm">Get Started Free</Link>
+            <Link to="/login" className="nav-signin">Sign in</Link>
+            <Link to="/register" className="btn btn-primary btn-sm">Start free</Link>
           </div>
 
-          <button className="mobile-menu-btn" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Toggle menu">
-            {mobileMenu ? <FiX /> : <FiMenu />}
+          <button
+            className="nav-burger"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+          >
+            {menuOpen ? <FiX /> : <FiMenu />}
           </button>
         </div>
 
-        {mobileMenu && (
-          <div className="mobile-menu">
-            <a href="#features" className="mobile-nav-link" onClick={() => setMobileMenu(false)}>Features</a>
-            <a href="#pricing" className="mobile-nav-link" onClick={() => setMobileMenu(false)}>Pricing</a>
-            <a href="#faq" className="mobile-nav-link" onClick={() => setMobileMenu(false)}>FAQ</a>
-            <Link to="/login" className="mobile-nav-link" onClick={() => setMobileMenu(false)}>Sign In</Link>
-            <Link to="/register" className="btn btn-primary w-full" onClick={() => setMobileMenu(false)}>Get Started Free</Link>
+        {menuOpen && (
+          <div className="mobile-menu" id="mobile-menu">
+            <a href="#problem" onClick={closeMenu}>Why server-side</a>
+            <a href="#how" onClick={closeMenu}>How it works</a>
+            <a href="#features" onClick={closeMenu}>Features</a>
+            <a href="#pricing" onClick={closeMenu}>Pricing</a>
+            <a href="#faq" onClick={closeMenu}>FAQ</a>
+            <Link to="/login" onClick={closeMenu}>Sign in</Link>
+            <Link to="/register" className="btn btn-primary btn-lg" onClick={closeMenu}>Start free</Link>
           </div>
         )}
-      </nav>
+      </header>
 
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-bg">
-          <div className="hero-orb orb-1" />
-          <div className="hero-orb orb-2" />
-          <div className="hero-grid" />
-        </div>
-
-        <div className="hero-content">
-          <div className="hero-badge">
-            <RiSpeedLine />
-            <span>Server-Side Tracking Made Simple</span>
-          </div>
-
-          <h1 className="hero-title">
-            Deploy sGTM Containers <br />
-            <span className="gradient-text">in Under 60 Seconds</span>
-          </h1>
-
-          <p className="hero-subtitle">
-            eComFly gives your ecommerce business enterprise-grade server-side tracking infrastructure.
-            Bypass ad blockers, improve conversion data, and scale your analytics — all without any DevOps hassle.
-          </p>
-
-          <div className="hero-actions">
-            <Link to="/register" className="btn btn-primary btn-xl">
-              Start for Free <FiArrowRight />
-            </Link>
-            <a href="#pricing" className="btn btn-secondary btn-xl">
-              View Pricing
-            </a>
-          </div>
-
-          <p className="hero-note">✓ Free plan available · ✓ No credit card required · ✓ Deploy in 60 seconds</p>
-        </div>
-
-        {/* 3D Hero Visual Element */}
-        <div className="hero-visual-wrapper">
-          <div className="floating-badge badge-1">
-            <FiLayers /> Server-Side
-          </div>
-          <div className="floating-badge badge-2">
-            <RiCodeSSlashLine /> GTM Ready
-          </div>
-          <div className="floating-badge badge-3">
-            <FiActivity /> 99.9% Uptime
-          </div>
-          
-          <div className="hero-dashboard-mockup">
-            <div className="mockup-header">
-              <div className="mockup-dots">
-                <span className="dot dot-red"></span>
-                <span className="dot dot-yellow"></span>
-                <span className="dot dot-green"></span>
-              </div>
-              <div className="mockup-url">app.ecomfly.com/deploy</div>
-            </div>
-            <div className="mockup-body">
-              <div className="mockup-sidebar">
-                <div className="mockup-line w-full"></div>
-                <div className="mockup-line w-3/4"></div>
-                <div className="mockup-line w-1/2"></div>
-                <div className="mockup-line w-full mt-auto"></div>
-              </div>
-              <div className="mockup-content">
-                <div className="mockup-card">
-                  <div className="mockup-card-title"></div>
-                  <div className="mockup-chart">
-                    <div className="mockup-bar" style={{height: '40%'}}></div>
-                    <div className="mockup-bar" style={{height: '65%'}}></div>
-                    <div className="mockup-bar" style={{height: '45%'}}></div>
-                    <div className="mockup-bar" style={{height: '90%'}}></div>
-                    <div className="mockup-bar" style={{height: '75%'}}></div>
-                    <div className="mockup-bar" style={{height: '100%'}}></div>
-                  </div>
-                </div>
-                <div className="mockup-card-small-group">
-                  <div className="mockup-card-small"></div>
-                  <div className="mockup-card-small"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Bar */}
-        <div className="stats-bar">
-          {STATS.map((stat, i) => (
-            <div key={i} className="stat-item">
-              <span className="stat-number">{stat.value}</span>
-              <span className="stat-label-text">{stat.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CRO Section */}
-      <section id="cro" className="section cro-section">
-        <div className="section-inner">
-          <div className="cro-container">
-            <div className="cro-content">
-              <span className="section-tag tag-amber">Conversion Optimization</span>
-              <h2 className="section-title">Recover <span className="gradient-text-amber">20-30%</span> of Lost Data</h2>
-              <p className="cro-desc">
-                Ad blockers and ITP (Intelligent Tracking Prevention) are silently killing your ROAS. By moving your tracking server-side, you feed Facebook CAPI and Google Ads the pristine, first-party data they need to optimize campaigns.
+      <main>
+        {/* Hero */}
+        <section className="hero">
+          <div className="hero-bg" aria-hidden="true" />
+          <div className="wrap hero-grid">
+            <div className="hero-copy">
+              <p className="eyebrow"><span className="eyebrow-dot" /> Managed server-side GTM hosting</p>
+              <h1 className="hero-title">
+                Track every sale your pixels <em>miss.</em>
+              </h1>
+              <p className="hero-sub">
+                eComFly hosts your server-side Google Tag Manager container on your own domain.
+                Go live in 60 seconds, bypass ad blockers, and give Meta, Google and TikTok the
+                complete conversion data they need to optimise.
               </p>
-              <ul className="cro-list">
-                <li><FiCheck className="icon-green" /> Decrease Cost Per Acquisition (CPA)</li>
-                <li><FiCheck className="icon-green" /> Boost Return on Ad Spend (ROAS)</li>
-                <li><FiCheck className="icon-green" /> Feed 100% accurate data to algorithms</li>
-                <li><FiCheck className="icon-green" /> Completely immune to browser ad-blockers</li>
+
+              <div className="hero-cta">
+                <Link to="/register" className="btn btn-primary btn-xl">
+                  Start free <FiArrowRight />
+                </Link>
+                <a href="#calculator" className="btn btn-secondary btn-xl">
+                  Estimate your lost revenue
+                </a>
+              </div>
+
+              <ul className="hero-assure">
+                <li><FiCheck aria-hidden="true" /> No credit card</li>
+                <li><FiCheck aria-hidden="true" /> 10,000 free events / month</li>
+                <li><FiCheck aria-hidden="true" /> No DevOps required</li>
               </ul>
             </div>
-            <div className="cro-visual">
-              <div className="cro-card">
-                <div className="cro-card-header">
-                  <div>
-                    <h4 className="cro-card-title">Campaign ROAS</h4>
-                    <p className="cro-card-subtitle">Last 30 Days vs Previous</p>
-                  </div>
-                  <div className="cro-badge">+ 34.2%</div>
-                </div>
-                <div className="cro-chart">
-                  <div className="cro-bar-group">
-                    <div className="cro-bar cro-bar-old">
-                      <div className="cro-bar-fill" style={{ height: '45%' }}></div>
-                    </div>
-                    <span className="cro-label">Browser<br/>Only</span>
-                  </div>
-                  <div className="cro-bar-group">
-                    <div className="cro-bar cro-bar-new">
-                      <div className="cro-bar-fill" style={{ height: '95%' }}></div>
-                    </div>
-                    <span className="cro-label">Server-Side<br/>(eComFly)</span>
-                  </div>
-                </div>
-              </div>
+
+            <div className="hero-visual">
+              <HeroPipeline />
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section id="features" className="section">
-        <div className="section-inner">
-          <div className="section-header">
-            <span className="section-tag">Why eComFly?</span>
-            <h2 className="section-title">Everything you need for <br /><span className="gradient-text">server-side tracking</span></h2>
-            <p className="section-subtitle">
-              A complete platform that handles the complexity of sGTM so you can focus on growing your business.
-            </p>
-          </div>
-
-          <div className="features-grid">
-            {FEATURES.map((f, i) => (
-              <div key={i} className={`feature-card feature-${f.color}`}>
-                <div className={`feature-icon ${f.color}`}>{f.icon}</div>
-                <h3 className="feature-title">{f.title}</h3>
-                <p className="feature-desc">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="section section-dark">
-        <div className="section-inner">
-          <div className="section-header">
-            <span className="section-tag">Simple Setup</span>
-            <h2 className="section-title">Get tracking in <span className="gradient-text">3 simple steps</span></h2>
-          </div>
-
-          <div className="steps-grid">
-            {[
-              { num: '01', title: 'Create Container', desc: 'Sign up and create your sGTM container with one click. Get an auto-generated tracking domain instantly.', icon: <FiServer /> },
-              { num: '02', title: 'Connect Tag Manager', desc: 'Copy the server URL and paste it into your Google Tag Manager as the server container URL.', icon: <FiZap /> },
-              { num: '03', title: 'Track & Scale', desc: 'Events flow through your private server. Monitor, analyze, and scale as your business grows.', icon: <FiBarChart2 /> },
-            ].map((step, i) => (
-              <div key={i} className="step-card">
-                <div className="step-number">{step.num}</div>
-                <div className="step-icon">{step.icon}</div>
-                <h3 className="step-title">{step.title}</h3>
-                <p className="step-desc">{step.desc}</p>
-                {i < 2 && <div className="step-arrow"><FiArrowRight /></div>}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="section">
-        <div className="section-inner">
-          <div className="section-header">
-            <span className="section-tag">Pricing</span>
-            <h2 className="section-title">Simple, <span className="gradient-text">event-based pricing</span></h2>
-            <p className="section-subtitle">
-              Start free. Scale as you grow. Offline payment via Bank Transfer, bKash & Nagad.
-            </p>
-          </div>
-
-          <div className="pricing-grid">
-            {PLANS.map((plan, i) => (
-              <div key={i} className={`pricing-card ${plan.color} ${plan.badge === 'Popular' ? 'featured' : ''}`}>
-                {plan.badge && <div className={`pricing-badge ${plan.color}`}>{plan.badge}</div>}
-
-                <div className="pricing-header">
-                  <h3 className="plan-name">{plan.name}</h3>
-                  <div className="plan-events">{plan.events} events/mo</div>
-                  <div className="plan-price">
-                    {plan.price === 'Custom' ? (
-                      <span className="price-custom">Custom</span>
-                    ) : (
-                      <>
-                        <span className="price-currency">৳</span>
-                        <span className="price-amount">{plan.price}</span>
-                        {plan.period && <span className="price-period">/{plan.period}</span>}
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="plan-features">
-                  {plan.features.map((f, j) => (
-                    <div key={j} className="plan-feature">
-                      <FiCheck className="feature-check" />
-                      <span>{f}</span>
-                    </div>
-                  ))}
-                  {plan.notIncluded.map((f, j) => (
-                    <div key={j} className="plan-feature disabled">
-                      <FiX className="feature-x" />
-                      <span>{f}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <Link
-                  to="/register"
-                  className={`btn w-full ${plan.badge === 'Popular' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ justifyContent: 'center' }}
-                >
-                  {plan.price === 'Custom' ? 'Contact Us' : plan.price === '0' ? 'Start Free' : 'Get Started'}
-                  <FiArrowRight />
-                </Link>
-              </div>
-            ))}
-          </div>
-
-          {/* Payment Methods */}
-          <div className="payment-methods">
-            <p className="payment-title">Accepted Payment Methods</p>
-            <div className="payment-badges">
-              <div className="payment-badge">🏦 Bank Transfer</div>
-              <div className="payment-badge">📱 bKash</div>
-              <div className="payment-badge">📱 Nagad</div>
-              <div className="payment-badge">✅ Manual Verification</div>
+          <div className="wrap">
+            <div className="stats" role="list">
+              {STATS.map((s) => <Stat key={s.label} {...s} />)}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="section section-dark">
-        <div className="section-inner section-narrow">
-          <div className="section-header">
-            <span className="section-tag">FAQ</span>
-            <h2 className="section-title">Frequently asked <span className="gradient-text">questions</span></h2>
+        {/* Integrations */}
+        <section className="logos" aria-label="Works with">
+          <div className="wrap">
+            <p className="logos-label">Plugs into the stack you already run</p>
+            <ul className="logos-row">
+              {INTEGRATIONS.map(({ name, Icon }) => (
+                <li key={name} title={name}>
+                  <Icon aria-hidden="true" />
+                  <span>{name}</span>
+                </li>
+              ))}
+            </ul>
           </div>
+        </section>
 
-          <div className="faq-list">
-            {faqs.map((faq, i) => (
-              <div key={i} className={`faq-item ${activeFaq === i ? 'active' : ''}`}>
-                <button className="faq-question" onClick={() => setActiveFaq(activeFaq === i ? null : i)}>
-                  <span>{faq.q}</span>
-                  <span className="faq-toggle">{activeFaq === i ? '−' : '+'}</span>
-                </button>
-                {activeFaq === i && (
-                  <div className="faq-answer">{faq.a}</div>
-                )}
+        {/* Problem */}
+        <section className="section" id="problem">
+          <div className="wrap">
+            <div className="section-head" data-reveal>
+              <p className="kicker">The problem</p>
+              <h2>Your browser tracking is leaking revenue.</h2>
+              <p className="lede">
+                Every blocked pixel is a sale your ad platforms never learn from. The gap grows
+                as browsers tighten privacy, and you keep paying to optimise on incomplete data.
+              </p>
+            </div>
+
+            <div className="problems">
+              {PROBLEMS.map((p, i) => (
+                <article key={p.title} className="problem" data-reveal style={{ '--d': `${i * 80}ms` }}>
+                  <span className="problem-n">0{i + 1}</span>
+                  <h3>{p.title}</h3>
+                  <p>{p.desc}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Calculator */}
+        <section className="section section-tint" aria-labelledby="calc-title">
+          <div className="wrap">
+            <div className="section-head" data-reveal>
+              <p className="kicker">Revenue calculator</p>
+              <h2 id="calc-title">See what server-side tracking is worth to you.</h2>
+              <p className="lede">Adjust the sliders to match your store. The result updates instantly.</p>
+            </div>
+            <div data-reveal><RoiCalculator /></div>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section className="section" id="how">
+          <div className="wrap">
+            <div className="section-head" data-reveal>
+              <p className="kicker">How it works</p>
+              <h2>From sign-up to live tracking in three steps.</h2>
+            </div>
+
+            <ol className="steps">
+              <li className="step" data-reveal>
+                <div className="step-ui" aria-hidden="true">
+                  <div className="mini">
+                    <span className="mini-label">Container name</span>
+                    <div className="mini-input">my-store</div>
+                    <div className="mini-btn">Create container</div>
+                  </div>
+                </div>
+                <span className="step-n">Step 1</span>
+                <h3>Create a container</h3>
+                <p>Sign up and spin up your sGTM container in one click. A secure tracking subdomain is ready instantly.</p>
+              </li>
+
+              <li className="step" data-reveal style={{ '--d': '90ms' }}>
+                <div className="step-ui">
+                  <div className="mini">
+                    <span className="mini-label">Server container URL</span>
+                    <div className="mini-code">
+                      <code>https://track.yourstore.com</code>
+                      <button type="button" onClick={copyUrl} aria-label="Copy example URL">
+                        {copied ? <FiCheck /> : <FiCopy />}
+                      </button>
+                    </div>
+                    <span className="mini-hint">Paste into GTM → Admin → Container settings</span>
+                  </div>
+                </div>
+                <span className="step-n">Step 2</span>
+                <h3>Connect Tag Manager</h3>
+                <p>Copy your server URL into Google Tag Manager as the server container URL. Optionally add your own domain.</p>
+              </li>
+
+              <li className="step" data-reveal style={{ '--d': '180ms' }}>
+                <div className="step-ui" aria-hidden="true">
+                  <div className="mini">
+                    <span className="mini-label">Events today</span>
+                    <div className="mini-bars">
+                      {[38, 52, 44, 68, 59, 82, 74, 96].map((h, i) => (
+                        <i key={i} style={{ '--h': `${h}%`, '--i': i }} />
+                      ))}
+                    </div>
+                    <span className="mini-hint"><b className="live-dot" /> Receiving events</span>
+                  </div>
+                </div>
+                <span className="step-n">Step 3</span>
+                <h3>Track and scale</h3>
+                <p>Events flow through your private server. Monitor usage and upgrade only when your store outgrows the plan.</p>
+              </li>
+            </ol>
+
+            <div className="center" data-reveal>
+              <Link to="/register" className="btn btn-dark btn-lg">Create your container <FiArrowRight /></Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section className="section section-tint" id="features">
+          <div className="wrap">
+            <div className="section-head" data-reveal>
+              <p className="kicker">Platform</p>
+              <h2>Everything between your storefront and your ad platforms.</h2>
+              <p className="lede">We run the infrastructure so you can focus on campaigns, not servers.</p>
+            </div>
+
+            <div className="features">
+              {FEATURES.map(({ Icon, title, desc }, i) => (
+                <article key={title} className="feature" data-reveal style={{ '--d': `${(i % 3) * 70}ms` }}>
+                  <span className="feature-icon"><Icon aria-hidden="true" /></span>
+                  <h3>{title}</h3>
+                  <p>{desc}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing */}
+        <section className="section" id="pricing">
+          <div className="wrap">
+            <div className="section-head center" data-reveal>
+              <p className="kicker">Pricing</p>
+              <h2>Simple pricing that scales with your events.</h2>
+              <p className="lede">Start free and upgrade only when you need more volume. Prices in Bangladeshi Taka, billed monthly.</p>
+            </div>
+
+            <Pricing />
+
+            <ul className="assurances" data-reveal>
+              <li><FiRepeat aria-hidden="true" /><span><strong>Switch plans anytime.</strong> Upgrades are instant; downgrades apply next cycle.</span></li>
+              <li><FiShield aria-hidden="true" /><span><strong>SSL on every plan.</strong> Included for your subdomain and custom domains.</span></li>
+              <li><FiCreditCard aria-hidden="true" /><span><strong>Pay locally.</strong> Bank Transfer, bKash and Nagad, verified by our team.</span></li>
+            </ul>
+
+            <div className="pay" data-reveal>
+              <span className="pay-label">Accepted payment methods</span>
+              <span className="pay-pill"><FiCreditCard aria-hidden="true" /> Bank Transfer</span>
+              <span className="pay-pill"><FiSmartphone aria-hidden="true" /> bKash</span>
+              <span className="pay-pill"><FiSmartphone aria-hidden="true" /> Nagad</span>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="section section-tint" id="faq">
+          <div className="wrap faq-grid">
+            <div className="faq-intro" data-reveal>
+              <p className="kicker">FAQ</p>
+              <h2>Questions, answered.</h2>
+              <p className="lede">Can’t find what you’re looking for? Start free and see for yourself, or reach out to our team.</p>
+              <div className="faq-actions">
+                <Link to="/register" className="btn btn-primary">Start free <FiArrowRight /></Link>
+                <a className="btn btn-secondary" href="mailto:hello@ecomfly.com">Email us</a>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
 
-      {/* CTA Section */}
-      <section className="section cta-section">
-        <div className="cta-bg">
-          <div className="cta-orb" />
-        </div>
-        <div className="section-inner text-center">
-          <div className="cta-content">
-            <h2 className="cta-title">Ready to supercharge your tracking?</h2>
-            <p className="cta-subtitle">Join hundreds of ecommerce stores already using eComFly for server-side analytics.</p>
-            <Link to="/register" className="btn btn-primary btn-xl">
-              Start Free Today <FiArrowRight />
-            </Link>
-            <p className="cta-note">No credit card required · Cancel anytime</p>
+            <div className="faq-list" data-reveal>
+              {FAQS.map((f) => (
+                <details key={f.q} name="faq" className="faq">
+                  <summary>
+                    <span>{f.q}</span>
+                    <FiPlus aria-hidden="true" />
+                  </summary>
+                  <div className="faq-a"><p>{f.a}</p></div>
+                </details>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* Final CTA */}
+        <section className="final" aria-labelledby="final-title">
+          <div className="wrap">
+            <div className="final-card" data-reveal>
+              <div className="final-grid" aria-hidden="true" />
+              <h2 id="final-title">Your ad platforms are only as good as the data you feed them.</h2>
+              <p>Set up server-side tracking today and start counting the conversions you’ve been missing.</p>
+              <div className="final-cta">
+                <Link to="/register" className="btn btn-primary btn-xl">Start free <FiArrowRight /></Link>
+                <a href="#pricing" className="btn btn-secondary btn-xl">Compare plans</a>
+              </div>
+              <p className="final-note">No credit card · Free plan never expires · Cancel anytime</p>
+            </div>
+          </div>
+        </section>
+      </main>
 
       {/* Footer */}
       <footer className="footer">
-        <div className="footer-inner">
+        <div className="wrap footer-grid">
           <div className="footer-brand">
-            <Link to="/" className="logo">
-              <div className="logo-icon"><RiRadarLine /></div>
-              <span className="logo-text">eComFly</span>
-            </Link>
-            <p className="footer-tagline">Server-side tracking for ecommerce, simplified.</p>
+            <Link to="/" aria-label="eComFly home"><Logo /></Link>
+            <p>Managed server-side tracking for ecommerce, simplified.</p>
             <div className="footer-social">
               <a href="#" aria-label="Twitter"><FiTwitter /></a>
               <a href="#" aria-label="LinkedIn"><FiLinkedin /></a>
-              <a href="#" aria-label="Email"><FiMail /></a>
+              <a href="mailto:hello@ecomfly.com" aria-label="Email"><FiMail /></a>
             </div>
           </div>
 
-          <div className="footer-links">
-            <div className="footer-col">
-              <h4>Product</h4>
-              <a href="#features">Features</a>
-              <a href="#pricing">Pricing</a>
-              <a href="#faq">FAQ</a>
-              <Link to="/register">Get Started</Link>
-            </div>
-            <div className="footer-col">
-              <h4>Company</h4>
-              <a href="#">About</a>
-              <a href="#">Blog</a>
-              <a href="#">Contact</a>
-            </div>
-            <div className="footer-col">
-              <h4>Legal</h4>
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-              <a href="#">Cookie Policy</a>
-            </div>
-          </div>
+          <nav className="footer-col" aria-label="Product">
+            <h4>Product</h4>
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+          <nav className="footer-col" aria-label="Account">
+            <h4>Account</h4>
+            <Link to="/login">Sign in</Link>
+            <Link to="/register">Create account</Link>
+          </nav>
+          <nav className="footer-col" aria-label="Legal">
+            <h4>Legal</h4>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Cookie Policy</a>
+          </nav>
         </div>
-        <div className="footer-bottom">
-          <p>© 2024 eComFly. All rights reserved.</p>
+        <div className="wrap footer-bottom">
+          <p>© {new Date().getFullYear()} eComFly. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Mobile sticky CTA */}
+      <div className={`sticky-cta ${showSticky ? 'is-on' : ''}`} aria-hidden={!showSticky}>
+        <div>
+          <strong>Start tracking server-side</strong>
+          <span>Free · no credit card</span>
+        </div>
+        <Link to="/register" className="btn btn-primary" tabIndex={showSticky ? 0 : -1}>Start free</Link>
+      </div>
     </div>
   );
 }

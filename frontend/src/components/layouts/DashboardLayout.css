@@ -24,9 +24,9 @@
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(11,18,32,0.4);
   z-index: 199;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(2px);
 }
 
 .sidebar-header {
@@ -58,8 +58,8 @@
 .sidebar-plan {
   margin: 1rem 1rem 0.5rem;
   padding: 0.875rem;
-  background: rgba(99,102,241,0.06);
-  border: 1px solid rgba(99,102,241,0.15);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -92,15 +92,15 @@
   color: var(--primary-light);
   text-decoration: none;
   padding: 0.3rem 0.6rem;
-  background: rgba(99,102,241,0.15);
-  border: 1px solid rgba(99,102,241,0.3);
+  background: rgba(35,80,240,0.15);
+  border: 1px solid rgba(35,80,240,0.3);
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
   white-space: nowrap;
 }
 
 .plan-upgrade:hover {
-  background: rgba(99,102,241,0.25);
+  background: rgba(35,80,240,0.25);
 }
 
 /* Nav */
@@ -142,14 +142,14 @@
 }
 
 .sidebar-link:hover {
-  background: rgba(99,102,241,0.08);
-  color: var(--text-secondary);
+  background: var(--bg-subtle);
+  color: var(--text-primary);
 }
 
 .sidebar-link.active {
-  background: rgba(99,102,241,0.12);
-  color: var(--primary-light);
-  border: 1px solid rgba(99,102,241,0.2);
+  background: var(--primary-tint);
+  color: var(--primary);
+  font-weight: 600;
 }
 
 .link-icon {
@@ -194,7 +194,7 @@
   z-index: 100;
   height: var(--header-height);
   background: var(--bg-overlay);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -239,7 +239,7 @@
 
 .usage-mini-bar {
   height: 4px;
-  background: rgba(255,255,255,0.08);
+  background: #eaecf0;
   border-radius: var(--radius-full);
   overflow: hidden;
 }
@@ -303,7 +303,7 @@
 
 .user-menu-trigger:hover {
   border-color: var(--border-hover);
-  background: rgba(99,102,241,0.04);
+  background: rgba(35,80,240,0.04);
 }
 
 .user-avatar {
@@ -377,7 +377,7 @@
 }
 
 .dropdown-item:hover {
-  background: rgba(99,102,241,0.08);
+  background: rgba(35,80,240,0.08);
   color: var(--text-primary);
 }
 

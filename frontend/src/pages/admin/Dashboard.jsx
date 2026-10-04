@@ -82,15 +82,15 @@ export default function AdminDashboard() {
             <AreaChart data={CHART_DATA}>
               <defs>
                 <linearGradient id="adminGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#2350f0" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#2350f0" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="day" tick={{fill:'#475569',fontSize:10}} axisLine={false} tickLine={false} interval={4}/>
-              <YAxis tick={{fill:'#475569',fontSize:10}} axisLine={false} tickLine={false} width={50}/>
+              <CartesianGrid strokeDasharray="3 3" stroke="#eaecf0" />
+              <XAxis dataKey="day" tick={{fill:'#667085',fontSize:10}} axisLine={false} tickLine={false} interval={4}/>
+              <YAxis tick={{fill:'#667085',fontSize:10}} axisLine={false} tickLine={false} width={50}/>
               <Tooltip />
-              <Area type="monotone" dataKey="events" stroke="#6366f1" strokeWidth={2} fill="url(#adminGrad)" dot={false} />
+              <Area type="monotone" dataKey="events" stroke="#2350f0" strokeWidth={2} fill="url(#adminGrad)" dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

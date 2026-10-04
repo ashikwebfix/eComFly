@@ -6,7 +6,7 @@ import {
   FiGrid, FiUsers, FiServer, FiCreditCard, FiSettings,
   FiLogOut, FiMenu, FiX, FiShield, FiDollarSign
 } from 'react-icons/fi';
-import { RiRadarLine } from 'react-icons/ri';
+import Logo from '../Logo';
 import './DashboardLayout.css';
 import './AdminLayout.css';
 
@@ -37,8 +37,7 @@ export default function AdminLayout() {
       <aside className={`sidebar admin-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
           <NavLink to="/" className="sidebar-logo">
-            <div className="logo-icon"><RiRadarLine /></div>
-            <span className="logo-text">eComFly</span>
+            <Logo />
           </NavLink>
           <button className="sidebar-close" onClick={() => setSidebarOpen(false)}><FiX /></button>
         </div>

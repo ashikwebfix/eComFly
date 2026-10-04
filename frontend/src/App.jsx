@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
 
 // Public Pages
 import HomePage from './pages/HomePage';
@@ -82,7 +81,6 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider>
         <AuthProvider>
         <AppRoutes />
         <Toaster
@@ -90,23 +88,23 @@ export default function App() {
           toastOptions={{
             duration: 4000,
             style: {
-              background: '#131d2e',
-              color: '#f1f5f9',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: '12px',
+              background: '#ffffff',
+              color: '#0b1220',
+              border: '1px solid #e4e7ec',
+              boxShadow: '0 12px 32px -8px rgba(16,24,40,0.16)',
+              borderRadius: '10px',
               fontSize: '0.875rem',
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Geist', 'Inter', sans-serif",
             },
             success: {
-              iconTheme: { primary: '#10b981', secondary: '#131d2e' },
+              iconTheme: { primary: '#12a373', secondary: '#ffffff' },
             },
             error: {
-              iconTheme: { primary: '#ef4444', secondary: '#131d2e' },
+              iconTheme: { primary: '#dc3a2f', secondary: '#ffffff' },
             },
           }}
         />
         </AuthProvider>
-      </ThemeProvider>
     </BrowserRouter>
   );
 }

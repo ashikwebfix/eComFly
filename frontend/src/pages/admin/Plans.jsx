@@ -108,9 +108,9 @@ export default function AdminPlans() {
       ) : (
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:'1.25rem'}}>
         {plans.map(plan => (
-          <div key={plan.id} className="card" style={{position:'relative',border:plan.is_featured?'1px solid rgba(99,102,241,0.4)':undefined}}>
+          <div key={plan.id} className="card" style={{position:'relative',border:plan.is_featured?'1px solid rgba(35,80,240,0.4)':undefined}}>
             {plan.is_featured && (
-              <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',background:'linear-gradient(135deg,#6366f1,#818cf8)',color:'white',padding:'0.25rem 0.875rem',borderRadius:999,fontSize:'0.7rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'0.06em',display:'flex',alignItems:'center',gap:4,whiteSpace:'nowrap'}}>
+              <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',background:'linear-gradient(135deg,#2350f0,#5b7cf5)',color:'white',padding:'0.25rem 0.875rem',borderRadius:999,fontSize:'0.7rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'0.06em',display:'flex',alignItems:'center',gap:4,whiteSpace:'nowrap'}}>
                 <FiStar /> Featured
               </div>
             )}

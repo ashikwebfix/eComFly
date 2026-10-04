@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiCheck } from 'react-icons/fi';
-import { RiRadarLine } from 'react-icons/ri';
+import Logo from '../components/Logo';
+import AuthAside from '../components/AuthAside';
 import './AuthPage.css';
 
 export default function RegisterPage() {
@@ -21,7 +22,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register({ name: form.name, email: form.email, password: form.password });
-      toast.success('Account created! Welcome to eComFly 🚀');
+      toast.success('Account created. Welcome to eComFly!');
       navigate('/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
@@ -34,22 +35,16 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-page">
-      <div className="auth-bg">
-        <div className="auth-orb auth-orb-1" />
-        <div className="auth-orb auth-orb-2" />
-        <div className="auth-grid" />
-      </div>
-
-      <div className="auth-container">
-        <div className="auth-card auth-card-wide">
-          <Link to="/" className="auth-logo">
-            <div className="logo-icon"><RiRadarLine /></div>
-            <span className="logo-text">eComFly</span>
+      <main className="auth-main">
+        <div className="auth-container wide">
+        <div className="auth-card">
+          <Link to="/" className="auth-logo" aria-label="eComFly home">
+            <Logo />
           </Link>
 
           <div className="auth-header">
             <h1 className="auth-title">Create your account</h1>
-            <p className="auth-subtitle">Start tracking server-side in minutes</p>
+            <p className="auth-subtitle">Free forever on the starter tier. Live in about a minute.</p>
           </div>
 
           <div className="auth-perks">
@@ -118,7 +113,9 @@ export default function RegisterPage() {
             <p>Already have an account? <Link to="/login" className="auth-link">Sign in</Link></p>
           </div>
         </div>
-      </div>
+        </div>
+      </main>
+      <AuthAside heading="Start recovering lost conversions today." />
     </div>
   );
 }

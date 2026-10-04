@@ -76,7 +76,7 @@ export default function ContainerDetail() {
         </Link>
         <div className="page-header">
           <div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
-            <div style={{width:48,height:48,background:'rgba(99,102,241,0.15)',border:'1px solid rgba(99,102,241,0.3)',borderRadius:'var(--radius-lg)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.3rem',color:'var(--primary-light)'}}>
+            <div style={{width:48,height:48,background:'rgba(35,80,240,0.15)',border:'1px solid rgba(35,80,240,0.3)',borderRadius:'var(--radius-lg)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.3rem',color:'var(--primary-light)'}}>
               <FiServer />
             </div>
             <div>
@@ -136,15 +136,15 @@ export default function ContainerDetail() {
             <AreaChart data={CHART_DATA}>
               <defs>
                 <linearGradient id="detailGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25}/>
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#2350f0" stopOpacity={0.25}/>
+                  <stop offset="95%" stopColor="#2350f0" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="hour" tick={{fill:'#475569',fontSize:9}} axisLine={false} tickLine={false} interval={3} />
-              <YAxis tick={{fill:'#475569',fontSize:10}} axisLine={false} tickLine={false} width={35} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#eaecf0" />
+              <XAxis dataKey="hour" tick={{fill:'#667085',fontSize:9}} axisLine={false} tickLine={false} interval={3} />
+              <YAxis tick={{fill:'#667085',fontSize:10}} axisLine={false} tickLine={false} width={35} />
               <Tooltip />
-              <Area type="monotone" dataKey="events" stroke="#6366f1" strokeWidth={2} fill="url(#detailGrad)" dot={false} />
+              <Area type="monotone" dataKey="events" stroke="#2350f0" strokeWidth={2} fill="url(#detailGrad)" dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

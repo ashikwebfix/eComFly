@@ -46,7 +46,7 @@ const CustomTooltip = ({active, payload, label}) => {
 };
 
 // Generate some basic colors for the pie chart
-const COLORS = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+const COLORS = ['#2350f0', '#0f766e', '#10b981', '#f59e0b', '#c2410c', '#7c3aed'];
 
 export default function UserUsage() {
   const [usage, setUsage] = useState({ current_events: 0, event_limit: 10000, percentage: 0 });
@@ -93,7 +93,7 @@ export default function UserUsage() {
   })).filter(c => c.value > 0);
 
   if (containerBreakdown.length === 0) {
-    containerBreakdown.push({ name: 'No Events', value: 1, color: 'rgba(255,255,255,0.1)' });
+    containerBreakdown.push({ name: 'No Events', value: 1, color: '#eaecf0' });
   }
 
   return (
@@ -168,15 +168,15 @@ export default function UserUsage() {
             <AreaChart data={dailyData}>
               <defs>
                 <linearGradient id="usageGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#0f766e" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#0f766e" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="day" tick={{fill:'#475569',fontSize:10}} axisLine={false} tickLine={false} interval={4} />
-              <YAxis tick={{fill:'#475569',fontSize:10}} axisLine={false} tickLine={false} width={40} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#eaecf0" />
+              <XAxis dataKey="day" tick={{fill:'#667085',fontSize:10}} axisLine={false} tickLine={false} interval={4} />
+              <YAxis tick={{fill:'#667085',fontSize:10}} axisLine={false} tickLine={false} width={40} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="events" stroke="#06b6d4" strokeWidth={2} fill="url(#usageGrad)" dot={false} />
+              <Area type="monotone" dataKey="events" stroke="#0f766e" strokeWidth={2} fill="url(#usageGrad)" dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -218,13 +218,13 @@ export default function UserUsage() {
         </div>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={monthlyData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-            <XAxis dataKey="month" tick={{fill:'#475569',fontSize:11}} axisLine={false} tickLine={false} />
-            <YAxis tick={{fill:'#475569',fontSize:11}} axisLine={false} tickLine={false} width={45} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#eaecf0" />
+            <XAxis dataKey="month" tick={{fill:'#667085',fontSize:11}} axisLine={false} tickLine={false} />
+            <YAxis tick={{fill:'#667085',fontSize:11}} axisLine={false} tickLine={false} width={45} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="events" fill="url(#barGrad)" radius={[4,4,0,0]}>
               {monthlyData.map((_, i) => (
-                <Cell key={i} fill={i === monthlyData.length - 1 ? '#818cf8' : '#6366f1'} />
+                <Cell key={i} fill={i === monthlyData.length - 1 ? '#5b7cf5' : '#2350f0'} />
               ))}
             </Bar>
           </BarChart>
